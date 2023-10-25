@@ -9,7 +9,6 @@ const handleActivateAffiliateCode = (async(req, res)=>{
     //============================ activate Affiliate Code =================
     const body = req.body;
     let user_id = req.id
-
     if(!body.code){
         return res.status(500).json({
             status:false,
@@ -17,7 +16,6 @@ const handleActivateAffiliateCode = (async(req, res)=>{
         })
     }
     const msg = await helper.activateCode(body.code, user_id)
-
     return res.status(200).json({
         status:true,
         message: msg
@@ -35,7 +33,6 @@ const handleAffiliateProfile = (async (req, res)=>{
       console.log(error.message)
     }
 })
-
 
 const handleActivateAffiliate = (async (req, res)=>{
     let user_id = req.id

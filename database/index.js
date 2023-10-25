@@ -7,9 +7,9 @@ const connection = mysql.createConnection({
   database: 'dotplayplay'
 });
  
-connection.connect((error, result) => {
-  if (error) {console.log(error)};
-  console.log('Connected to MySQL database!');
-});
+// connection.connect((error, result) => {
+//   if (error) {console.log(error)};
+//   console.log('Connected to MySQL database!');
+// });
 
 module.exports = { connection }

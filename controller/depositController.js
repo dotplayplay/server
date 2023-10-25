@@ -1,223 +1,233 @@
-const { default: axios } = require("axios");
-const crypto = require("crypto");
-const { connection } = require("../database");
-const CCPAYMENT_API_ID = "202310051818371709996528511463424";
-const CC_APP_SECRET = "206aed2f03af1b70305fb11319f2f57b";
-const CCPAYMENT_API_URL = "https://admin.ccpayment.com";
-const { handleProfileTransactions } = require("../profile_mangement/index")
-const { handlePPDunLockUpdate } = require("../profile_mangement/ppd_unlock")
-const { handleTotalNewDepsitCount } = require("../profile_mangement/cashbacks")
+const { connection } = require("../database/index")
+const crypto = require('crypto');
+const { handleWagerIncrease, handleProfileTransactions } = require("../profile_mangement/index")
+const DiceEncription = require("../model/dice_encryped_seeds")
+const DiceGame = require("../model/dice_game")
+const Wallet = require("../model/wallet")
+const USDtWallet = require("../model/Usdt")
+const PPFWallet = require("../model/wgf-wallet")
 
-const RequestTransaction = ((event)=>{
-  let data = {
-    user_id: event.user_id,
-    order_id: event.data.order_id,
-    amount: event.data.amount,
-    crypto: event.data.crypto,
-    network: event.data.network,
-    pay_address: event.data.pay_address,
-    token_id: event.data.token_id,
-    order_valid_period: event.data.order_valid_period,
-    time: new Date(),
-    merchant_order_id: event.merchant_order_id,
-    contract: "",
-    status: "pending"
-  }
-  if(event.msg === "success"){
-    let sql = `INSERT INTO deposit_request SET ?`;
-    connection.query(sql, data, (err, result)=>{
-        if(err){
-            (err)
-        }else{
-          (result)
-        }
-    })
-  }
-})
-
-const handleFirstDeposit = ((user_id, amount, num)=>{
-    let data = {
-      user_id,
-      amount,
-      date: new Date()
-    }
-    let bonus
-    if(num < 1){
-     bonus = amount * (180 / 100)
-    }
-    else if(num === 1){
-      bonus = amount * (240 / 100)
-    }
-    else if(num === 2){
-      bonus = amount * (300 / 100)
-    }
-    else if(num === 3){
-      bonus = amount * (360 / 100)
-    }
-    handlePPDunLockUpdate(user_id, bonus)
-    let sql = `INSERT INTO first_deposit SET ?`;
-    connection.query(sql, data, (err, result)=>{
-        if(err){
-            (err)
-        }else{
-          (result)
-        }
-    })
-})
-
-const handleSuccessfulDeposit = ((event)=>{
-  let query1 = `SELECT * FROM deposit_request WHERE merchant_order_id="${event.merchant_order_id}"`;
-  connection.query(query1, async function(error, data){
-    let user_id = data[0].user_id
-    let order_amount = parseFloat(data[0].amount)
-      handleFirstDeposit(user_id, order_amount, data.length)
-      handleTotalNewDepsitCount(order_amount)
-    let sql22= `UPDATE deposit_request SET status="${event.status}", contract="${event.contract}" WHERE user_id="${user_id}" AND merchant_order_id="${event.merchant_order_id}"`;
-    connection.query(sql22, function (err, result) {
-      if (err) throw err;
-    (result)
-    });
-    let query1 = `SELECT * FROM usdt_wallet WHERE user_id="${user_id}"`;
-    connection.query(query1, async function(error, data){
-      let prev_bal = parseFloat(data[0].balance)
-      let sql22= `UPDATE usdt_wallet SET balance="${prev_bal + order_amount}"  WHERE user_id="${user_id}"`;
-      connection.query(sql22, function (err, result) {
-        if (err) throw err;
-      (result)
-      });
-    })
-  })
-})
-
-const handleFailedTransaction = ((event)=>{
-  let query1 = `SELECT * FROM deposit_request WHERE merchant_order_id="${event.merchant_order_id}"`;
-  connection.query(query1, async function(error, data){
-    let user_id = data[0].user_id
-  let sql22= `UPDATE deposit_request SET status="${event.status}", contract="${event.contract}" WHERE user_id="${user_id}" AND merchant_order_id="${event.merchant_order_id}"`;
-  connection.query(sql22, function (err, result) {
-    if (err) throw err;
-  (result)
-  });
-})
-})
-
-
-const initiateDeposit = async (req, res) => {
-  try {
-    const user_id = req.id
-    const { data } = req.body;
-    const transaction_type = "Wallet Fund";
-    const timestamp = Math.floor(Date.now() / 1000);
-    let tokenid;
-
-    if(data.network === "erc"){
-      tokenid = "264f4725-3cfd-4ff6-bc80-ff9d799d5fb2"
-    }
-    else if(data.network === "trc"){
-      tokenid = "0912e09a-d8e2-41d7-a0bc-a25530892988"
-    }
-    else if(data.network === "bep"){
-      tokenid = "92b15088-7973-4813-b0f3-1895588a5df7"
-    }
-    const merchant_order_id = Math.floor(Math.random()*100000) + 1000000;
-    const currency = "USD";
-    const paymentData = {
-      remark: transaction_type,
-      token_id : tokenid,
-      product_price: data.amount.toString(),
-      merchant_order_id:merchant_order_id.toString(),
-      denominated_currency: currency,
-      order_valid_period: 43200,
-    };
-
-    let str = CCPAYMENT_API_ID + CC_APP_SECRET +  timestamp + JSON.stringify(paymentData);
-    let sign = crypto.createHash("sha256").update(str, "utf8").digest("hex");
-    const headers = {
-      Appid: CCPAYMENT_API_ID,
-      "Content-Type": "application/json; charset=utf-8",
-      Timestamp: timestamp,
-      Sign: sign,
-    };
-  await axios.post(`${CCPAYMENT_API_URL}/ccpayment/v1/bill/create`, paymentData,
-      {  headers: headers } 
-    ).then((response)=>{
-      RequestTransaction({...response.data, user_id, merchant_order_id:merchant_order_id.toString()})
-      res.status(200).json({status: true,message: response.data.msg, ...response.data, status: "pending"});
-    })
-    .catch((error)=>{
-      console.error("Error processing deposit:", error);
-      res.status(404).json({ status: false, message: "Internal server error" });
-    })
-  }
-   catch (error) {
-    console.error("Error processing deposit:", error);
-    res.status(500).json({ status: false, message: "Internal server error" });
-  }
-};
-
-const confirmDeposit = async () => {
-  try {
-    let usersID = []
-    let query1 = `SELECT * FROM  deposit_request`;
-    connection.query(query1, async function(error, data){
-      for(let i = 0; i < data.length; i++){
-        if(data[i].status === "pending"){
-            usersID.push(data[i].merchant_order_id)
-        }
-      }
-    })
-    setTimeout(async()=>{
-      const timestamp = Math.floor(Date.now() / 1000);
-      let str =  CCPAYMENT_API_ID + CC_APP_SECRET + timestamp +  JSON.stringify({"merchant_order_ids": usersID});
-      let sign = crypto.createHash("sha256").update(str, "utf8").digest("hex");
-      const headers = {
-        Appid: CCPAYMENT_API_ID,
-        "Content-Type": "application/json; charset=utf-8",
-        Timestamp: timestamp,
-        Sign: sign,
-      };
-    
-      const response = await axios.post(
-      `${CCPAYMENT_API_URL}/ccpayment/v1/bill/info`,{
-        merchant_order_ids: usersID
-      },
-        {
-          headers: headers,
-        }
-      );
-      let result = response.data.data
-      if(usersID.length !== 0){
-        for(let e = 0; e < result.length; e++){
-          if(result[0].order_detail.status === "Successful"){
-              handleSuccessfulDeposit(result[0].order_detail)
-          }
-          else if(result[0].order_detail.status !== "Pending"){
-            handleFailedTransaction(result[0].order_detail)
-          }
-      }
-      }
-    },2000)
-  } catch (error) {
-    console.error("Error confirming deposit:", error);
-    res.status(500).json({ status: false, message: "Internal server error" });
-  }
+let nonce = 0
+let maxRange = 100
+const { format } = require('date-fns');
+const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+const salt = 'Qede00000000000w00wd001bw4dc6a1e86083f95500b096231436e9b25cbdd0075c4';
+function generateRandomNumber(serverSeed, clientSeed) {
+    nonce += 1
+  const combinedSeed = `${serverSeed}-${clientSeed}-${nonce}`;
+  const hmac = crypto.createHmac('sha256', combinedSeed);
+  const hmacHex = hmac.digest('hex');
+  const decimalValue = (parseInt(hmacHex , 32) % 10001 / 100)
+  const randomValue = (decimalValue % maxRange).toFixed(2);
+  let row = { point : randomValue, server_seed:serverSeed, client_seed:clientSeed, nonce }
+  return row;
 }
-// setInterval(() => {
-//   confirmDeposit()
-// }, 6000);
 
 
-const fetchPendingOrder = ((req, res)=>{
-    const user_id = req.id
-    try{
-    let query1 = `SELECT * FROM  deposit_request WHERE user_id="${user_id}" AND status="${"pending"}"`;
-      connection.query(query1, async function(error, data){
-        res.status(200).json(data)
-      })
-    }
-    catch(error){
-      res.status(500).json(error)
+const updateUserWallet = (async(data)=>{
+
+  await Wallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
+  if(data.bet_token_name === "PPF"){
+    await PPFWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
+  }
+  else if(data.bet_token_name === "USDT"){
+    await USDtWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
+  }
+})
+
+
+const handleDiceBet = (async(req,res)=>{
+    const {user_id} = req.id
+    let {sent_data} = req.body
+
+    const GetEncryptedSeeds = (async(user_id)=>{
+
+        const CraeatBetGame = (async(data)=>{
+          let date = new Date();
+          let hours = date.getHours();
+          let minutes = date.getMinutes();
+          let newformat = hours >= 12 ? 'PM' : 'AM';
+          hours = hours % 12;
+          hours = hours ? hours : 12;
+          minutes = minutes < 10 ? '0' + minutes : minutes;
+          let time = (hours + ':' + minutes + ' ' + newformat);
+
+            let bet = {
+              user_id: data.user_id,
+              username: data.username,
+              profile_img: data.user_img,
+              bet_amount: data.bet_amount,
+              token: data.bet_token_name,
+              token_img:data.bet_token_img,
+              bet_id: Math.floor(Math.random()*10000000)+ 72000000,
+              game_nonce: nonce,
+              cashout: parseFloat(data.io.point),
+              profit: data.payoutIO,
+              client_seed: data.io.client_seed,
+              server_seed: data.io.server_seed,
+              time: time,
+              hidden_from_public: data.hidden,
+              payout: data.payout,
+              has_won : data.has_won,
+              chance: data.chance,
+              time_date: currentTime
+            }
+            let wallet = {
+                coin_name: data.bet_token_name,
+                coin_image:  data.bet_token_img,
+                balance:  parseFloat(data.current_amount).toFixed(4),
+            }
+           let previusGame = await DiceGame.find({user_id})
+           let result = await DiceGame.create(bet)
+            res.status(200).json({history:[...previusGame, result], wallet,point: parseFloat(data.io.point)})
+
+
+            // let trx_rec = {
+            //   user_id: data.user_id,
+            //   transaction_type: data.has_won ? "Classic Dice-Win" : "Classic Dice-Betting", 
+            //   sender_img: "", 
+            //   sender_name: "DPP_wallet", 
+            //   sender_balance: 0,
+            //   trx_amount: data.has_won ? data.payoutIO : data.bet_amount,
+            //   receiver_balance: data.current_amount,
+            //   datetime: currentTime, 
+            //   receiver_name: data.bet_token_name,
+            //   receiver_img: data.bet_token_img,
+            //   status: 'successful',
+            //   transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+            //   is_sending: 0
+            // }
+            // handleProfileTransactions(trx_rec)
+          })
+
+        let hidden;
+        let response =  await DiceEncription.find({user_id})
+        let server = response[0].server_seed
+        let client = response[0].client_seed
+
+          // if(sent_data.bet_token_name !== "PPF"){
+          //   handleWagerIncrease(user_id, sent_data.bet_amount, sent_data.bet_token_img)
+          // }
+
+          const randomResult = generateRandomNumber(server, client);
+
+          if(parseFloat(sent_data.chance) > parseFloat(randomResult.point)){
+            try {
+              let sjbhsj = await Wallet.find({user_id})
+                if(sjbhsj[0].hidden_from_public){
+                    hidden = true
+                  }else{
+                    hidden = false
+                }
+                let previous_bal = parseFloat(sjbhsj[0].balance)
+                let wining_amount = parseFloat(sent_data.wining_amount)
+                let current_amount = previous_bal + wining_amount
+
+                updateUserWallet({current_amount, ...sent_data, user_id})
+                CraeatBetGame({...sent_data, user_id, payoutIO:wining_amount,hidden,  has_won : true, io: randomResult, current_amount})
+            } catch (err) {
+              res.status(501).json({ message: err.message });
+            }
+          }else{
+              try {
+                let response =  await Wallet.find({user_id})
+                  if(response[0].hidden_from_public){
+                    hidden = true
+                  }else{
+                    hidden = false
+                  }
+                let previous_bal = parseFloat(response[0].balance)
+                let bet_amount = parseFloat(sent_data.bet_amount)
+                let current_amount = previous_bal - bet_amount
+                CraeatBetGame({...sent_data, user_id,payoutIO:0,hidden, has_won : false, io: randomResult, current_amount})
+                updateUserWallet({current_amount, ...sent_data, user_id})
+              } catch (err) {
+                res.status(501).json({ message: err.message });
+              }
+          }
+     
+    })
+  
+  if(sent_data.bet_amount < 0.2){
+    res.status(501).json({ error:  "Minimum Bet amount for classic Dice is 0.20"});
+  } 
+  else if (sent_data.bet_amount > 5000){
+    res.status(501).json({ error:  "Minimum Bet amount for classic Dice is 5000"});
+  } else{
+    GetEncryptedSeeds(user_id)
+  }
+})
+
+
+const seedSettings = (async ( req, res )=>{
+    let {user_id} = req.id
+    let {data} = req.body
+const handleHashGeneration = (()=>{
+  const serverSeed = crypto.randomBytes(32).toString('hex');
+  const clientSeed = data;
+  const combinedSeed = serverSeed + salt + clientSeed;
+  const hash = crypto.createHash('sha256').update(combinedSeed).digest('hex');
+  return hash
+})
+  try{
+    let client_seed = data
+    let server_seed = handleHashGeneration()
+    nonce = 0
+    let sql2 = `UPDATE dice_encryped_seeds SET server_seed="${server_seed}", client_seed="${client_seed}",  updated_at="${currentTime}"  WHERE user_id="${user_id}"`;
+    connection.query(sql2, function (err, result) {
+      if (err) throw err;
+      (result)
+    });
+    res.status(200).json("Updated sucessfully")
+  }
+  catch(err){
+    res.status(501).json({ message: err });
+  }
+})
+
+
+const getDiceGameHistory = (async (req, res)=>{
+    const {user_id} = req.id
+    try {
+      let disoa = await DiceGame.find({user_id})
+        res.status(200).json(disoa)
+    } catch (err) {
+      res.status(501).json({ message: err.message });
     }
 })
 
-module.exports = { initiateDeposit, fetchPendingOrder }
+
+// ============================== Initialize dice game ===============================
+const InitializeDiceGame = (async(user_id)=>{
+
+  const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  function generateString(length) {
+      let result = '';
+      const charactersLength = characters.length;
+      for ( let i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
+  }
+  
+  const salt = 'Qede00000000000w00wd001bw4dc6a1e86083f95500b096231436e9b25cbdd0075c4';
+  
+  const handleHashGeneration = (()=>{
+      const serverSeed = crypto.randomBytes(32).toString('hex');
+      const clientSeed = generateString(23);
+      const combinedSeed = serverSeed + salt + clientSeed;
+      const hash = crypto.createHash('sha256').update(combinedSeed).digest('hex');
+      let encrypt = { hash, clientSeed }
+      return encrypt
+  })
+    let data = {
+        user_id: user_id,
+        server_seed: handleHashGeneration().hash,
+        client_seed: handleHashGeneration().clientSeed,
+        updated_at: currentTime
+    }
+     await DiceEncription.create(data)
+  })
+  
+
+module.exports = { handleDiceBet , getDiceGameHistory, seedSettings, InitializeDiceGame}

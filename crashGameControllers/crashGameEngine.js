@@ -9,24 +9,19 @@ const {Helper} = require('../utils/helperFunction')
 const { handleRechargeimplement } = require("../profile_mangement/cashbacks")
 const { handleMonthlyCashbackImplementation } = require("../profile_mangement/monthlycashback")
 const { handleWeeklyCashbackImplementation, Nextmonday } = require("../profile_mangement/week_cashback")
-const helper = new Helper()
-const crypto = require("crypto");
+const CrashHash = require("../model/crash_hash")
+const CrashGame = require("../model/crashgame")
+const CrashHistory = require("../model/crash-game-history")
 
-
+let is_consumed = 1
 async function createsocket(httpServer){
 const fetchHashseed = (async()=>{
-    let yu = []
-    const consumed = await helper.updateCrashConsume()  || 1
-    let query = `SELECT * FROM crash_hash`;
-    connection.query(query, async(error, data)=>{
-    yu.push(data[data.length - consumed])
-    let f = setTimeout(()=>{
-        let r = crashPointFromHash(yu[0])
-        handleCrashPoint(r)
-    },500)
+    const crashes =  await CrashHash.find()
+    let crash_reps = crashes[crashes.length - is_consumed]
+    let result = crashPointFromHash(crash_reps)
+    is_consumed += 1
+    return result
 })
-})
-
 
 const io = new Server(httpServer, {
     cors: {
@@ -34,32 +29,21 @@ const io = new Server(httpServer, {
     },
 });
 
-let details = ''
-const handleCrashPoint = ((e)=>{
-    details = (e)
-})
-
 // ==================== fetch single active users bets ==================================
-const fetchUsersBets = (()=>{
-    let query = `SELECT * FROM  crash_game`;
-    connection.query(query, async function(error, data){
-        io.emit("my-bet", data)
-    })
+const fetchUsersBets = (async()=>{
+    const data = await CrashGame.find()
+     io.emit("my-bet", data)
 })
 
-const fetch_activePlayers = ((game_id)=>{
-    let query = `SELECT * FROM  crash_game  WHERE game_id = "${game_id}"`;
-    connection.query(query, async function(error, data){
-        io.emit("active_players", data)
-        io.emit("crash-game-redtrend", data)
-    })
+const fetch_activePlayers = (async(game_id)=>{
+    const data = await CrashGame.find({game_id})
+    io.emit("active_players", data)
+    io.emit("crash-game-redtrend", data)
 })
 
-const fetchPreviousCrashHistory = (()=>{
-    let query = `SELECT * FROM  crash_game_history`;
-    connection.query(query, async function(error, data){
-        io.emit("crash-game-history", data)
-    })
+const fetchPreviousCrashHistory = (async()=>{
+    const data = await CrashHistory.find()
+    io.emit("crash-game-history", data)
 })
 
 const autobetWallet = ((event)=>{
@@ -222,12 +206,14 @@ const handleRedTrendballEl = ((game)=>{
 
 //  ====== red trend ball lost ============
 const handleRedTrendball = ((game)=>{
-    let sql2 = `UPDATE crash_game SET user_status="${0}", cashout="${0}", profit="${0}", has_won="${0}" WHERE game_id="${game.game_id}" AND game_type="Red" `;
-    connection.query(sql2, function (err, result) {
-      if (err) throw err;
-      (result)
-        io.emit("crash-all-redball-users", "is-crash")
-    });
+    if(game.game_id !== undefined){
+        let sql2 = `UPDATE crash_game SET user_status="${0}", cashout="${0}", profit="${0}", has_won="${0}" WHERE game_id="${game.game_id}" AND game_type="Red" `;
+        connection.query(sql2, function (err, result) {
+          if (err) throw err;
+          (result)
+            io.emit("crash-all-redball-users", "is-crash")
+        });
+    }
 })
 
 // ==================================================== Green Trendball section =============================================================== 
@@ -733,16 +719,16 @@ const handle_h_hundred = ((speed, action)=>{
 
 let load_animate = 100
 const HandleCountDown = ( async (e)=>{
-    fetchHashseed()
+   let detail = await fetchHashseed()
     fetchPreviousCrashHistory()
-    fetchUsersBets(details)
+    fetchUsersBets(detail)
     let timeSec = e
     let timeLoop = setInterval(() => {
     if (timeSec.toFixed(2) <= 0.1) {
         clearInterval(timeLoop);
-        handleMultiplier(details)
+        handleMultiplier(detail)
     }else{
-        fetch_activePlayers(details.game_id)
+        fetch_activePlayers(detail.game_id)
         timeSec -= 0.01;
         load_animate -= 0.2
 
@@ -756,7 +742,7 @@ const HandleCountDown = ( async (e)=>{
         io.emit("crash-state", "load-crash")
         io.emit("countdown", timeSec)
         io.emit("load-animation", load_animate)
-        io.emit("game_id", details.game_id)
+        io.emit("game_id", detail.game_id)
         io.emit("v_ten", 0)
         io.emit("v_hundred", 0)
         io.emit("v_FiveHundred", 0)
@@ -782,7 +768,6 @@ const HandleCountDown = ( async (e)=>{
     }
     }, 15);
 })
-
 
 //  =================================== All game crash handler ===================================
 
@@ -830,7 +815,7 @@ const handleCrashed = ((crash_point)=>{
 })
 
 // ====================== initialize the game countdown ============================
-HandleCountDown(5)
+// HandleCountDown(5)
 
 // ================================================ Game logic =======================================
 
@@ -1104,7 +1089,7 @@ const weeklyCashback = async () => {
             }
     })
 }
-setInterval(() => weeklyCashback(), 1000);
+// setInterval(() => weeklyCashback(), 1000);
 
 //================ weeklyCASHBACK ================
 const monthlyCashback = async () => {
@@ -1128,15 +1113,16 @@ const monthlyCashback = async () => {
     })
 }
 
-setInterval(() => monthlyCashback(), 1000);
+// setInterval(() => monthlyCashback(), 1000);
 const previousChats = (()=>{
     let query = `SELECT * FROM public_chat`;
     connection.query(query, async function(error, response){
         io.emit("public-chat", response)
     })
 })
-setInterval(() => previousChats(), 400);
+// setInterval(() => previousChats(), 400);
 }
+
 
 module.exports = {
     createsocket
