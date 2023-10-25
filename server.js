@@ -15,7 +15,7 @@ const mongoose = require('mongoose')
 // const { createsocket } = require("./crashGameControllers/crashGameEngine.js");
 // require("./controller/crashControllers.js");
 
-const CrashGame = require("./routes/crashgame.js");
+// const CrashGame = require("./routes/crashgame.js");
 const User = require("./routes/Users.js");
 const Profile = require("./routes/Profile.js");
 // const Chat = require("./routes/chat");
@@ -30,7 +30,7 @@ const Wallet = require("./routes/wallet.js");
 require("dotenv").config();
 
 //========================= socket =============
-const { createServer } = require("node:http");
+// const { createServer } = require("node:http");
 // const { reports } = require("./adminController/reports");
 
 // ============ Initilize the app ========================
@@ -39,7 +39,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-const server = createServer(app);
+// const server = createServer(app);
 
 // async function main() {
 //   createsocket(server);
