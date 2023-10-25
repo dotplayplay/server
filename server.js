@@ -10,7 +10,7 @@ const mongoose = require('mongoose')
 // const Affiliate = require("./routes/affiliate");
 // const payment_api = require("./routes/payment_api");
 // const { Nextmonday } = require("./profile_mangement/week_cashback")
-// // // Nextmonday()
+ // Nextmonday()
 
 // const { createsocket } = require("./crashGameControllers/crashGameEngine.js");
 // require("./controller/crashControllers.js");
