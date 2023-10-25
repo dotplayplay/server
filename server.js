@@ -5,22 +5,22 @@ const mongoose = require('mongoose')
 // const Admin = require("./routes/admin/admin");
 // const AllPLays = require("./routes/admin/PLayers/crashPlayers");
 // const VerifyGames = require("./routes/admin/games/crash");
-const AdminStat = require("./routes/admin/statistic/statistics");
+// const AdminStat = require("./routes/admin/statistic/statistics");
 // const Dashboard = require("./routes/admin/dashboard/dashboard");
 // const Affiliate = require("./routes/affiliate");
 // const payment_api = require("./routes/payment_api");
 // const { Nextmonday } = require("./profile_mangement/week_cashback")
 // // // Nextmonday()
 
-const { createsocket } = require("./crashGameControllers/crashGameEngine.js");
-require("./controller/crashControllers.js");
+// const { createsocket } = require("./crashGameControllers/crashGameEngine.js");
+// require("./controller/crashControllers.js");
 
 const CrashGame = require("./routes/crashgame.js");
 const User = require("./routes/Users.js");
 const Profile = require("./routes/Profile.js");
 // const Chat = require("./routes/chat");
 const Wallet = require("./routes/wallet.js");
-const diceGame = require("./routes/diceGame");
+// const diceGame = require("./routes/diceGame");
 // const Stats = require("./routes/statistic");
 // const Transaction = require("./routes/transactions.js");
 // const Payment = require("./routes/Payment.js");
@@ -41,14 +41,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 const server = createServer(app);
 
-async function main() {
-  createsocket(server);
-}
-main();
+// async function main() {
+//   createsocket(server);
+// }
+// main();
 
 // application routes
-app.use("/api/user/crash-game", CrashGame);
-app.use("/api/user/dice-game", diceGame);
+// app.use("/api/user/crash-game", CrashGame);
+// app.use("/api/user/dice-game", diceGame);
 app.use("/api/users", User);
 
 // app.use("/api/public-chat", Chat);
@@ -70,7 +70,7 @@ app.use("/api/wallet", Wallet);
 // app.use("/admin", Admin);
 // app.use("/admin/all-players", AllPLays);
 // app.use("/admin/verify", VerifyGames);
-app.use("/admin/stat", AdminStat);
+// app.use("/admin/stat", AdminStat);
 
 app.get("/", (req, res)=>{
   res.send("Welcome to PPD server")
@@ -83,6 +83,6 @@ const dbUri = `mongodb+srv://ValiantCodez:es2Iltc8hwDuBF5m@cluster0.gutge9q.mong
 mongoose.connect(dbUri, { useNewUrlParser: true,  useUnifiedTopology: true })
     .then((result)=>  console.log('Database connected'))
     .catch((err)=> console.log(err))
-server.listen(process.env.PORT, ()=>{
+app.listen(process.env.PORT, ()=>{
     console.log("Running on port "+ process.env.PORT)
 })
