@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require('mongoose')
-require("./crashGameControllers/genarateHash")
+// require("./crashGameControllers/genarateHash")
 // const Admin = require("./routes/admin/admin");
 // const AllPLays = require("./routes/admin/PLayers/crashPlayers");
 // const VerifyGames = require("./routes/admin/games/crash");
