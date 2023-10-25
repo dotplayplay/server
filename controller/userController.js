@@ -8,6 +8,7 @@ const { format } = require('date-fns');
 const { createCashbackTable } = require("../profile_mangement/cashbacks")
 const { genAffiliate } = require('../utils/genAffiliate');
 const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+const Chats = require("../model/public-chat")
 const {createPPF, createPPL, createPPD, createUsdt, handleDefaultWallet  } = require("../wallet_transaction/index")
 const { InitializeDiceGame } = require("../controller/diceControllers")
 const { handleCreatePPDunlocked } = require("../profile_mangement/ppd_unlock")
@@ -307,11 +308,16 @@ const SingleUserByID = (async(req, res)=>{
 })
 
 // ============= get previous messages ====================
-const previousChats = ((req, res)=>{
-    let query = `SELECT * FROM public_chat`;
-    connection.query(query, async function(error, response){
-        res.status(200).json(response)
-    })
+const previousChats = (async(req, res)=>{
+    try{
+        let newMessage = await Chats.find()
+        res.status(200).json(newMessage)
+    }
+    catch(err){
+        res.status(500).json({error: err})
+    }
+    
+    
 })
 
 module.exports = { 

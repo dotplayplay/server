@@ -12,13 +12,13 @@ const mongoose = require('mongoose')
 // const { Nextmonday } = require("./profile_mangement/week_cashback")
 // // // Nextmonday()
 
-// const { createsocket } = require("./crashGameControllers/crashGameEngine.js");
+const { createsocket } = require("./crashGameControllers/crashGameEngine.js");
 // require("./controller/crashControllers.js");
 
 // const CrashGame = require("./routes/crashgame.js");
 const User = require("./routes/Users.js");
 const Profile = require("./routes/Profile.js");
-// const Chat = require("./routes/chat");
+const Chat = require("./routes/chat");
 const Wallet = require("./routes/wallet.js");
 // const diceGame = require("./routes/diceGame");
 // const Stats = require("./routes/statistic");
@@ -30,7 +30,8 @@ const Wallet = require("./routes/wallet.js");
 require("dotenv").config();
 
 //========================= socket =============
-// const { createServer } = require("node:http");
+const { createServer } = require("node:http");
+const { Server } = require("@grpc/grpc-js");
 // const { reports } = require("./adminController/reports");
 
 // ============ Initilize the app ========================
@@ -39,19 +40,19 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-// const server = createServer(app);
+const server = createServer(app);
 
-// async function main() {
-//   createsocket(server);
-// }
-// main();
+async function main() {
+  createsocket(server);
+}
+main();
 
 // application routes
 // app.use("/api/user/crash-game", CrashGame);
 // app.use("/api/user/dice-game", diceGame);
 app.use("/api/users", User);
 
-// app.use("/api/public-chat", Chat);
+app.use("/api/public-chat", Chat);
 app.use("/api/profile", Profile);
 app.use("/api/wallet", Wallet);
 // app.use("/api/payment", Payment);
@@ -83,6 +84,6 @@ const dbUri = `mongodb+srv://ValiantCodez:es2Iltc8hwDuBF5m@cluster0.gutge9q.mong
 mongoose.connect(dbUri, { useNewUrlParser: true,  useUnifiedTopology: true })
     .then((result)=>  console.log('Database connected'))
     .catch((err)=> console.log(err))
-app.listen(process.env.PORT, ()=>{
+server.listen(process.env.PORT, ()=>{
     console.log("Running on port "+ process.env.PORT)
 })

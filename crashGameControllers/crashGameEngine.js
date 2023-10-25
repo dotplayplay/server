@@ -12,6 +12,7 @@ const { handleWeeklyCashbackImplementation, Nextmonday } = require("../profile_m
 const CrashHash = require("../model/crash_hash")
 const CrashGame = require("../model/crashgame")
 const CrashHistory = require("../model/crash-game-history")
+const Chats = require("../model/public-chat")
 
 let is_consumed = 1
 async function createsocket(httpServer){
@@ -1113,12 +1114,27 @@ const monthlyCashback = async () => {
     })
 }
 
-// setInterval(() => monthlyCashback(), 1000);
-const previousChats = (()=>{
-    let query = `SELECT * FROM public_chat`;
-    connection.query(query, async function(error, response){
-        io.emit("public-chat", response)
+let newMessage = await Chats.find()
+
+const handleNewChatMessages = (async(data)=>{
+    io.emit("new-messages", newMessage)
+  await Chats.create(data)
+})
+
+io.on("connection", (socket)=>{
+    socket.on("message", data=>{
+        newMessage.push(data)
+        handleNewChatMessages(data)
     })
+
+    socket.on("disconnect", ()=>{
+        console.log("disconnected")
+    })
+})
+
+const previousChats = (()=>{
+    let response = [1]
+     io.emit("public-chat", response)
 })
 // setInterval(() => previousChats(), 400);
 }
