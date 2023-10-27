@@ -25,7 +25,6 @@ const updateUserWallet = (async(data)=>{
     await PPLWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
 }
 })
-
 const CraeatBetGame = (async(data)=>{
   let bet = {
     user_id: data.user_id,
@@ -81,7 +80,7 @@ const handleCrashBet = (async(req, res)=>{
   let sent_data = data
   let game_type = "Classic"
   try {
-    if(sent_data.bet_token_name !== "WGF"){
+    if(sent_data.bet_token_name !== "PPF"){
       handleWagerIncrease(user_id, sent_data.bet_amount, sent_data.bet_token_img)
     }
     let result = await Wallet.find({user_id})
@@ -139,14 +138,14 @@ const handleCashout = (async(req, res)=>{
     let current_amount = (previous_bal + stopped_amount).toFixed(4)
     handleUpdateCrashState({...sent_data, user_id, current_amount:current_amount, stopped_amount })
     updateUserWallet({current_amount, ...sent_data, user_id})
-      res.status(200).json({...sent_data, cash:current_amount})
+      res.status(200).json({...sent_data, balance:current_amount})
   } catch (err) {
     res.status(501).json({ message: err.message });
   }
 })
 
 const handleRedTrendball = (async(req, res)=>{
-  const user_id = req.id
+  const {user_id} = req.id
   const {data} = req.body
   let sent_data = data
 
@@ -155,23 +154,25 @@ const handleRedTrendball = (async(req, res)=>{
   }
 
   try {
-    let query = `SELECT * FROM  wallet  WHERE user_id = "${user_id}"`;
-    connection.query(query, async function(error, data){
-    let previous_bal = parseFloat(data[0].balance)
+    let result = await Wallet.find({user_id})
+    let previous_bal = parseFloat(result[0].balance)
     let bet_amount = parseFloat(sent_data.bet_amount)
     let current_amount = parseFloat(previous_bal - bet_amount).toFixed(4)
-      if(data[0].hidden_from_public){
+      if(result[0].hidden_from_public){
         hidden = 1
       }else{
         hidden = 0
       }
+
       CraeatBetGame({...sent_data,hidden, user_id, current_amount})
       updateUserWallet({current_amount, ...sent_data, user_id})
-      res.status(200).json({...sent_data,current_amount, bet_amount})
-    })
+    res.status(200).json({...sent_data,current_amount, bet_amount})
+      // res.status(200).json({...sent_data,current_amount, bet_amount})
   } catch (err) {
     res.status(501).json({ message: err.message });
+    console.log(err)
   }
 })
+
 
 module.exports = { handleCrashBet, handleCashout , handleRedTrendball}

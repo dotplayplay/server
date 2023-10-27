@@ -205,15 +205,8 @@ const handleDailyPPFbonus =  (async(req, res)=>{
       date:now
      });
   }
-  
-    // let query = `SELECT * FROM ppf_wallet WHERE user_id="${user_id}"`;
-    // connection.query(query, async function(error, data){
-    //   let prev_bal = parseFloat(data[0].balance)
-    //   let pre_date = parseInt(data[0].date)
-    //   const now = new Date()
-    //   if(pre_date === now.getDate()){
-    //     return "don't add anything"
-    //   }else{
+
+
     //     let trx_rec = {
     //       user_id,
     //       transaction_type: "PPF daily bonus", 
@@ -230,13 +223,7 @@ const handleDailyPPFbonus =  (async(req, res)=>{
     //       is_sending: 0
     //     }
     //     handleProfileTransactions(trx_rec)
-    //     let sql22= `UPDATE ppf_wallet SET balance="${prev_bal + 20000}", date="${now.getDate()}" WHERE user_id="${user_id}"`;
-    //     connection.query(sql22, function (err, result) {
-    //       if (err) throw err;
-    //     (result)
-    //     });
-    //   }
-    // })  
+
 })
 
 module.exports = { SingleUser, UpdateUser, UpdateProfile,handleHiddenProfile , handlePublicUsername, handleRefusefriendRequest, handleRefuseTip, handleDailyPPFbonus, createProfile }

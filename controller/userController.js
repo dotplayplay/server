@@ -45,6 +45,8 @@ const CreateAccount = (async (req, res)=>{
         createPPD(user_id)
         createUsdt(user_id)
         InitializeDiceGame(user_id)
+        createCashbackTable(user_id)
+        handleCreatePPDunlocked(user_id)
         const Token = createToken(user_id)
         const default_wallet = await handleDefaultWallet(user_id)
         let result = await createProfile(email, username, invited_code, user_id )
@@ -85,6 +87,9 @@ const Register = (async(req, res)=>{
         createPPL(user_id)
         createPPD(user_id)
         createUsdt(user_id)
+        InitializeDiceGame(user_id)
+        createCashbackTable(user_id)
+        handleCreatePPDunlocked(user_id)
         const Token = createToken(user_id)
         const default_wallet = await handleDefaultWallet(user_id)
         let result = await createProfile(email, username, invited_code, user_id )
@@ -99,7 +104,6 @@ const Register = (async(req, res)=>{
         const Token = createToken(user_id)
         res.status(200).json({Token,default_wallet:default_wallet[0],result: result[0] })
     }
-
 })
 
 //============================ store Affiliate Code =================

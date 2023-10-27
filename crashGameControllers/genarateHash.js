@@ -15,16 +15,20 @@ const hashInput = async(input, times)=> {
                 game_id: gameId + num,
                 game_hash: hashedValue
             }
-          let saved = await CrashHash.create(data)
-            console.log(saved, num)
-            num += 1
+            try{
+                let saved = await CrashHash.create(data)
+                console.log(saved, num)
+                num += 1
+            }
+            catch(err){
+                console.log(err)
+            }
         }else{
             console.log("Generated hashes completed")
             clearInterval(inter)
         }
-    },2000)
+    },1000)
 }
-
 
 const input = `d71e0f071db39ecf8f1331ddfa58c073d267ee9388c4c4c967918a721f032042` // Replace with your actual input
 const numberOfTimesToHash =  300000;

@@ -1,37 +1,64 @@
 const { connection } = require("../database/index")
+const CashBackDB = require("../model/cash_back")
 
-const createCashbackTable = ((user_id)=>{
+
+const Nextmonday = (()=>{
+  const today = new Date();
+  // Get next month's index(0 based)
+  const nextMonth = today.getMonth() + 1;
+  const year = today.getFullYear() + (nextMonth === 12 ? 1: 0);
+  // Get first day of the next month
+  const firstDayOfNextMonth = new Date(year, nextMonth%12, 1);
+
+  function getNextMonday(date = new Date()) {
+    const dateCopy = new Date(date.getTime());
+    const nextMonday = new Date(
+      dateCopy.setDate(
+        dateCopy.getDate() + ((7 - dateCopy.getDay() + 1) % 7 || 7),
+      )
+    );
+    return nextMonday;
+  }
+  // 👇️ Get Monday of Next Weeka
+  let data = {
+    next_firstofthemonth: firstDayOfNextMonth,
+    next_monday: new Date(getNextMonday()) 
+  }
+  return getNextMonday()
+})
+
+
+const createCashbackTable = (async(user_id)=>{
   let data = {
     user_id: user_id,
     week_cashback: 0,
     week_bonus:0,
     monthly_cashback: 0,
     recharge_balance: 0,
-    recharge_settings: '',
+    recharge_settings: '-',
     total_level_bonus: 0,
     vip_level: 0,
     total_bonus_claimed:0,
     next_level_point:1,
     month_bonus: 0,
-    total_wagered: 0
+    total_wagered: 0,
+    nextMonday: Nextmonday()
   }
-  let sql = `INSERT INTO cashbacks SET ?`;
-  connection.query(sql, data, (err, data)=>{
-      if(err){
-          console.log(err)
-      }
-    })
+  try{
+  await  CashBackDB.create(data)
+  }
+  catch(err){
+    console.log(err)
+  }
 })
 
 
 const handleAllCashbacks = (async(req, res)=>{
-    const user_id = req.id
+    const {user_id} = req.id
     if(user_id){
       try{
-        let query = `SELECT * FROM cashbacks WHERE user_id="${user_id}"`;
-        connection.query(query, async function(error, data){
-          res.status(200).json(data[0])
-        })
+        const data = await CashBackDB.find({user_id})
+        res.status(200).json(data[0])
       }
       catch(err){
         res.status(500).json({error: err})
@@ -73,7 +100,7 @@ const handleUpdateDailyReports = (()=>{
     }
   })
 })
-setInterval(()=> handleUpdateDailyReports() ,1000)
+// setInterval(()=> handleUpdateDailyReports() ,1000)
 
 const handleNewNewlyRegisteredCount = (()=>{
   let query = `SELECT * FROM daily_reports`;
@@ -101,4 +128,4 @@ const handleTotalNewDepsitCount = ((amount)=>{
   })
 })
 
-module.exports = {  createCashbackTable, handleAllCashbacks, handleNewNewlyRegisteredCount, handleTotalNewDepsitCount}
+module.exports = {  createCashbackTable, handleAllCashbacks, handleNewNewlyRegisteredCount, handleTotalNewDepsitCount, }

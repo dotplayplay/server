@@ -55,7 +55,7 @@ const Userschema = new schema({
         required: true,
     },
     chance: {
-        type: Number,
+        type: String,
         required: true,
     },
     cashout: {
