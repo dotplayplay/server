@@ -23,11 +23,16 @@ let is_consumed = 1
 
 async function createsocket(httpServer){
 const fetchHashseed = (async()=>{
-    const crashes =  await CrashHash.find()
-    let crash_reps = crashes[crashes.length - is_consumed]
-    let result = crashPointFromHash(crash_reps)
-    is_consumed += 1
-    return result
+    try{
+        const crashes = await CrashHash.find()
+        let crash_reps = crashes[crashes.length - is_consumed]
+        let result = crashPointFromHash(crash_reps)
+        is_consumed += 1
+        return result
+    }
+    catch(error){
+        console.log("There no crash hash or Network issues")
+    }
 })
 
 const io = new Server(httpServer, {
@@ -44,9 +49,15 @@ const fetchUsersBets = (async()=>{
 })
 
 const fetch_activePlayers = (async(game_id)=>{
-    const data = await CrashGame.find({game_id})
-    io.emit("active_players", data)
-    io.emit("crash-game-redtrend", data)
+    try{
+        const data = await CrashGame.find({game_id})
+        io.emit("active_players", data)
+        io.emit("crash-game-redtrend", data)
+    }
+    catch(error){
+        console.log("Could not find games")
+    }
+ 
 })
 
 const fetchPreviousCrashHistory = (async()=>{
@@ -811,7 +822,11 @@ const handleCrashed = ((crash_point)=>{
 })
 
 // ====================== initialize the game countdown ============================
-HandleCountDown(5)
+let result = await fetchHashseed()
+if(result){
+    HandleCountDown(5)
+}
+
 // ================================================ Game logic =======================================
 
 const handleMultiplier = ((point)=>{
@@ -1064,6 +1079,7 @@ setInterval(()=>{
 //================ weeklyCASHBACK ================
 const weeklyCashback = async () => {
     let fulldata = await CashBackDB.find().select("nextMonday")
+    if(fulldata.length  > 0){
     let next_monday = fulldata[0].nextMonday
     let countDownDate = new Date(next_monday).getTime();
     let now = new Date().getTime();
@@ -1075,10 +1091,10 @@ const weeklyCashback = async () => {
     let seconds = Math.floor((distance % (1000 * 60)) / 1000);
     if (days === 0  && hours === 0 && minutes === 0 && seconds < 3) {
         handleWeeklyCashbackImplementation();
-        // handleRechargeimplement()
     }else{
         io.emit("weekly-count-down", `${ days !== 0 ? days + "d" : ""} ${hours}h ${minutes}m ${seconds}s`)
     }
+}
 }
 
 setInterval(() => weeklyCashback(), 1000);
@@ -1086,19 +1102,21 @@ setInterval(() => weeklyCashback(), 1000);
 //================ weeklyCASHBACK ================
 const monthlyCashback = async () => {
     let fulldata = await CashBackDB.find().select("nextMonth")
-    let next_month = fulldata[0].nextMonth
-    let countDownDate = new Date(next_month).getTime();
-    let now = new Date().getTime();
-    let distance = countDownDate - now;
-    // Time calculations for days, hours, minutes and seconds
-    let days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    let seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    if (new Date().getDate() === 1) {
-        handleMonthlyCashbackImplementation()
-    }else{
-        io.emit("monthly-count-down", `${ days !== 0 ? days + "d" : ""} ${hours}h ${minutes}m ${seconds}s`)
+    if(fulldata.length  > 0){
+        let next_month = fulldata[0].nextMonth
+        let countDownDate = new Date(next_month).getTime();
+        let now = new Date().getTime();
+        let distance = countDownDate - now;
+        // Time calculations for days, hours, minutes and seconds
+        let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        if (new Date().getDate() === 1) {
+            handleMonthlyCashbackImplementation()
+        }else{
+            io.emit("monthly-count-down", `${ days !== 0 ? days + "d" : ""} ${hours}h ${minutes}m ${seconds}s`)
+        }
     }
 }
 setInterval(() => monthlyCashback(), 1000);
