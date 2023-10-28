@@ -1,6 +1,7 @@
 const CashBackDB = require("../model/cash_back")
 const PPDWallet = require("../model/PPD-wallet")
 
+
 const Nextmonday = (()=>{
   const today = new Date();
   // Get next month's index(0 based)
@@ -31,6 +32,10 @@ const handleCashReturn = (async(user_id, cash)=>{
   await CashBackDB.updateOne({user_id},{
     week_cashback:0,
     week_bonus:cash
+  })
+
+  await CashBackDB.updateMany({},{
+    nextMonday: Nextmonday()
   })
 })
 
@@ -104,4 +109,4 @@ const handleClaimBonus = (async(req, res)=>{
 })
 
 
-module.exports = { handleWeeklyCashback, handleWeeklyCashbackImplementation , handleClaimBonus, Nextmonday}
+module.exports = { handleWeeklyCashback, handleWeeklyCashbackImplementation , handleClaimBonus}

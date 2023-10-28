@@ -2,19 +2,15 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require('mongoose')
 require("./crashGameControllers/genarateHash")
-// const Admin = require("./routes/admin/admin");
 const AllPLays = require("./routes/admin/PLayers/crashPlayers");
 // const VerifyGames = require("./routes/admin/games/crash");
 const AdminDiceGame = require("./routes/admin/games/dice-games");
 // const AdminStat = require("./routes/admin/statistic/statistics");
 // const Dashboard = require("./routes/admin/dashboard/dashboard");
-// const Affiliate = require("./routes/affiliate");
-// const payment_api = require("./routes/payment_api");
-// const { Nextmonday } = require("./profile_mangement/week_cashback")
-// // Nextmonday()
+const Affiliate = require("./routes/affiliate");
+
 
 const { createsocket } = require("./crashGameControllers/crashGameEngine.js");
-// require("./controller/crashControllers.js");
 
 const CrashGame = require("./routes/crashgame.js");
 const User = require("./routes/Users.js");
@@ -26,14 +22,13 @@ const diceGame = require("./routes/diceGame");
 // const Transaction = require("./routes/transactions.js");
 // const Payment = require("./routes/Payment.js");
 const Deposit = require("./routes/deposit");
+const Withdraw = require("./routes/withdraw")
 const Bonus = require('./routes/bonus')
-// const adminMembers = require('./routes/admin/members/members')
 require("dotenv").config();
 
 //========================= socket =============
 const { createServer } = require("node:http");
 const { Server } = require("@grpc/grpc-js");
-// const { reports } = require("./adminController/reports");
 
 // ============ Initilize the app ========================
 
@@ -59,21 +54,19 @@ app.use("/api/wallet", Wallet);
 // app.use("/api/payment", Payment);
 // app.use("/api/trans", Transaction);
 // app.use("/api/stats", Stats);
-// app.use("/api/affiliate", Affiliate);
+app.use("/api/affiliate", Affiliate);
 app.use("/api/deposit", Deposit);
+app.use("/api/withdraw", Withdraw);
 
 // app.use("/api/dashboard-details", Dashboard);
 app.use("/api/cashback", Bonus)
 // app.use("/api/admin",adminMembers)
 // app.use("/api/admin/reports-details", reports)
-// app.use("/api/pay-api", payment_api);
 
 // Admin routes
-// app.use("/admin", Admin);
 app.use("/admin/all-players", AllPLays);
 app.use("/admin/all-dice-game", AdminDiceGame);
 // app.use("/admin/verify", VerifyGames);
-// app.use("/admin/stat", AdminStat);
 
 app.get("/", (req, res)=>{
   res.send("Welcome to PPD server")

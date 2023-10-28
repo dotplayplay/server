@@ -54,6 +54,10 @@ const Userschema = new schema({
         type: Date,
         required: true,
     },
+    nextMonth: {
+        type: Date,
+        required: true,
+    },
 }, { timestamp : true})
 
 module.exports = mongoose.model('cashback', Userschema)

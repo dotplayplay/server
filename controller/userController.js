@@ -6,11 +6,11 @@ const { createProfile } = require("./profileControllers")
 var SECRET = `highscoretechBringwexsingthebestamoung23498hx93`
 const { format } = require('date-fns');
 const { createCashbackTable } = require("../profile_mangement/cashbacks")
-const { genAffiliate } = require('../utils/genAffiliate');
 const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 const Chats = require("../model/public-chat")
 const {createPPF, createPPL, createPPD, createUsdt, handleDefaultWallet  } = require("../wallet_transaction/index")
 const { InitializeDiceGame } = require("../controller/diceControllers")
+const { CreateAffiliate, CheckValidity } = require("./affiliateControllers")
 const { handleCreatePPDunlocked } = require("../profile_mangement/ppd_unlock")
 const { handleNewNewlyRegisteredCount } = require("../profile_mangement/cashbacks")
 const createToken = ((_id)=>{
@@ -21,7 +21,6 @@ const createToken = ((_id)=>{
 // Signup controller
 const CreateAccount = (async (req, res)=>{ 
     const data = req.body
-    let affiliate_bonus = 0
     let email = (data.user.email)
     let emailVerified = (data.user.emailVerified)
     let google_auth = false
@@ -31,7 +30,7 @@ const CreateAccount = (async (req, res)=>{
     const last_login_ip = req.socket.remoteAddress
     let password =  (data.user.apiKey)
     let provider =  (data.user.providerData[0].providerId)
-    let invited_code = ''
+    let invited_code = ""
     let username = data.user.displayName
     const fullData = {
         email, user_id, created_at, lastLoginAt, password, provider, emailVerified, google_auth,last_login_ip
@@ -47,6 +46,7 @@ const CreateAccount = (async (req, res)=>{
         InitializeDiceGame(user_id)
         createCashbackTable(user_id)
         handleCreatePPDunlocked(user_id)
+        CreateAffiliate(user_id)
         const Token = createToken(user_id)
         const default_wallet = await handleDefaultWallet(user_id)
         let result = await createProfile(email, username, invited_code, user_id )
@@ -75,9 +75,15 @@ const Register = (async(req, res)=>{
     let password =  (data.user.apiKey)
     let provider =  (data.user.providerData[0].providerId)
     let username = ''
-    let invited_code = ''
+    let invited_code = data.reff
     const fullData = {
         email, user_id, created_at, lastLoginAt, password, provider, emailVerified, google_auth,last_login_ip
+    }
+    if(invited_code){
+        let validateCode = await CheckValidity(invited_code,user_id )
+        if(validateCode){
+            invited_code = validateCode
+        }
     }
     const exist = await User.findOne({ user_id })
     if(!exist){
@@ -89,10 +95,11 @@ const Register = (async(req, res)=>{
         createUsdt(user_id)
         InitializeDiceGame(user_id)
         createCashbackTable(user_id)
+        CreateAffiliate(user_id)
         handleCreatePPDunlocked(user_id)
         const Token = createToken(user_id)
         const default_wallet = await handleDefaultWallet(user_id)
-        let result = await createProfile(email, username, invited_code, user_id )
+        let result = await createProfile(email, username, invited_code , user_id )
             res.status(200).json({Token,default_wallet,result })
         }
         catch(err){
@@ -104,43 +111,6 @@ const Register = (async(req, res)=>{
         const Token = createToken(user_id)
         res.status(200).json({Token,default_wallet:default_wallet[0],result: result[0] })
     }
-})
-
-//============================ store Affiliate Code =================
-const createAffiliate = ((_data)=>{
-    let user_id = _data?.user?.uid || _data?.user_id
-    let created_at = currentTime
-    let  affiliate_code = genAffiliate(9)
-    let registered_friends = 0
-    let  friends = JSON.stringify([])
-    let  new_codes_generated = JSON.stringify([])
-    let is_suspend = 0
-    let commission_reward = 0
-    let available_usd_reward = 0
-    let welcome_msg = _data?.welcome_msg?.trim() || ""
-    let is_activated = 0
-    let data =  {
-        user_id, 
-        created_at, 
-        affiliate_code,
-         registered_friends,
-         friends, 
-         commission_reward,
-         available_usd_reward,
-         welcome_msg,
-          is_activated, 
-         new_codes_generated,
-         is_suspend,
-         today_commission: 0
-    }
-    let sql = `INSERT INTO affiliate_code SET ?`;
-    connection.query(sql, data, (err, result)=>{
-        if(err){
-            console.log(err)
-        }else{
-           (result)
-        }
-    })
 })
 
 
@@ -320,8 +290,6 @@ const previousChats = (async(req, res)=>{
     catch(err){
         res.status(500).json({error: err})
     }
-    
-    
 })
 
 module.exports = { 

@@ -27,8 +27,13 @@ const Nextmonday = (()=>{
   return getNextMonday()
 })
 
+function startOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
 
 const createCashbackTable = (async(user_id)=>{
+  dt = new Date(); 
   let data = {
     user_id: user_id,
     week_cashback: 0,
@@ -42,7 +47,8 @@ const createCashbackTable = (async(user_id)=>{
     next_level_point:1,
     month_bonus: 0,
     total_wagered: 0,
-    nextMonday: Nextmonday()
+    nextMonday: Nextmonday(),
+    nextMonth: startOfMonth(dt)
   }
   try{
   await  CashBackDB.create(data)

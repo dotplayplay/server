@@ -8,11 +8,12 @@ const { handleProfileTransactions } = require("../profile_mangement/index")
 const {Helper} = require('../utils/helperFunction')
 const { handleRechargeimplement } = require("../profile_mangement/cashbacks")
 const { handleMonthlyCashbackImplementation } = require("../profile_mangement/monthlycashback")
-const { handleWeeklyCashbackImplementation, Nextmonday } = require("../profile_mangement/week_cashback")
+const { handleWeeklyCashbackImplementation } = require("../profile_mangement/week_cashback")
 const CrashHash = require("../model/crash_hash")
 const CrashGame = require("../model/crashgame")
 const CrashHistory = require("../model/crash-game-history")
 const Chats = require("../model/public-chat")
+const CashBackDB = require("../model/cash_back")
 
 const Wallet = require("../model/wallet")
 const USDT_wallet = require("../model/Usdt-wallet")
@@ -811,7 +812,6 @@ const handleCrashed = ((crash_point)=>{
 
 // ====================== initialize the game countdown ============================
 HandleCountDown(5)
-
 // ================================================ Game logic =======================================
 
 const handleMultiplier = ((point)=>{
@@ -1057,56 +1057,51 @@ const fetchActivePlayers = (()=>{
     })
 })
 
-
 setInterval(()=>{
     fetchActivePlayers()
 }, 2000)
 
 //================ weeklyCASHBACK ================
 const weeklyCashback = async () => {
-    let query = `SELECT * FROM app_timer`;
-    connection.query(query, async(error, data)=>{
-        let alldate = (data[data.length - 1].next_monday)
-            let countDownDate = alldate.getTime();
-            let now = new Date().getTime();
-            let distance = countDownDate - now;
-            // Time calculations for days, hours, minutes and seconds
-            let days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            if (days === 0  && hours === 0 && minutes === 0 && seconds < 3) {
-                handleWeeklyCashbackImplementation();
-                Nextmonday()
-                handleRechargeimplement()
-            }else{
-                io.emit("weekly-count-down", `${ days !== 0 ? days + "d" : ""} ${hours}h ${minutes}m ${seconds}s`)
-            }
-    })
+    let fulldata = await CashBackDB.find().select("nextMonday")
+    let next_monday = fulldata[0].nextMonday
+    let countDownDate = new Date(next_monday).getTime();
+    let now = new Date().getTime();
+    let distance = countDownDate - now;
+    // Time calculations for days, hours, minutes and seconds
+    let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    if (days === 0  && hours === 0 && minutes === 0 && seconds < 3) {
+        handleWeeklyCashbackImplementation();
+        // handleRechargeimplement()
+    }else{
+        io.emit("weekly-count-down", `${ days !== 0 ? days + "d" : ""} ${hours}h ${minutes}m ${seconds}s`)
+    }
 }
-// setInterval(() => weeklyCashback(), 1000);
+
+setInterval(() => weeklyCashback(), 1000);
 
 //================ weeklyCASHBACK ================
 const monthlyCashback = async () => {
-    let query = `SELECT * FROM app_timer`;
-    connection.query(query, async(error, data)=>{
-        let alldate = (data[data.length - 1].next_firstofthemonth)
-            let countDownDate = alldate.getTime();
-            let now = new Date().getTime();
-            let distance = countDownDate - now;
-            // Time calculations for days, hours, minutes and seconds
-            let days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            if (new Date().getDate() === 1) {
-                Nextmonday()
-                handleMonthlyCashbackImplementation()
-            }else{
-                io.emit("monthly-count-down", `${ days !== 0 ? days + "d" : ""} ${hours}h ${minutes}m ${seconds}s`)
-            }
-    })
+    let fulldata = await CashBackDB.find().select("nextMonth")
+    let next_month = fulldata[0].nextMonth
+    let countDownDate = new Date(next_month).getTime();
+    let now = new Date().getTime();
+    let distance = countDownDate - now;
+    // Time calculations for days, hours, minutes and seconds
+    let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    if (new Date().getDate() === 1) {
+        handleMonthlyCashbackImplementation()
+    }else{
+        io.emit("monthly-count-down", `${ days !== 0 ? days + "d" : ""} ${hours}h ${minutes}m ${seconds}s`)
+    }
 }
+setInterval(() => monthlyCashback(), 1000);
 
 let newMessage = await Chats.find()
 
@@ -1120,17 +1115,11 @@ io.on("connection", (socket)=>{
         newMessage.push(data)
         handleNewChatMessages(data)
     })
-
     socket.on("disconnect", ()=>{
         console.log("disconnected")
     })
 })
 
-const previousChats = (()=>{
-    let response = [1]
-     io.emit("public-chat", response)
-})
-// setInterval(() => previousChats(), 400);
 }
 
 

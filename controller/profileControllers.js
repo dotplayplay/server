@@ -201,7 +201,7 @@ const handleDailyPPFbonus =  (async(req, res)=>{
 
   if(yesterdy.getDate() !== now.getDate()){
     await PPFWallet.updateOne({ user_id }, {
-      balance: prev_bal + 10000,
+      balance: prev_bal + 20000,
       date:now
      });
   }
