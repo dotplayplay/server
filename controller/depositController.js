@@ -155,12 +155,14 @@ const confirmDeposit = async () => {
   try {
     let usersID = []
     let deoop = await DepositRequest.find()
-      for(let i = 0; i < deoop.length; i++){
-        if(deoop[i].status === "Pending"){
-            usersID.push(deoop[i].merchant_order_id)
-        }
+    if(deoop > 0){
+      deoop.forEach(element => {
+        if(element.status === "Pending"){
+          usersID.push(element.merchant_order_id)
       }
-  if(usersID.length !== 0){
+      });
+    }
+  if(usersID.length > 0){
     setTimeout(async()=>{
       const timestamp = Math.floor(Date.now() / 1000);
       let str =  CCPAYMENT_API_ID + CC_APP_SECRET + timestamp +  JSON.stringify({"merchant_order_ids": usersID});
@@ -180,7 +182,7 @@ const confirmDeposit = async () => {
         }
       );
       let result = response.data.data
-      if(usersID.length !== 0){
+      if(usersID.length > 0){
         result.forEach(element => {
           if(element.order_detail.status === "Successful"){
             handleSuccessfulDeposit(element.order_detail)
@@ -194,8 +196,8 @@ const confirmDeposit = async () => {
   }
   } catch (error) {
     console.error("Error confirming deposit:", error);
-    res.status(500).json({ status: false, message: "Internal server error" });
   }
+  console.log()
 }
 
 setInterval(() => {
