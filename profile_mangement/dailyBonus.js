@@ -1,7 +1,8 @@
 const { handleProfileTransactions } = require("../profile_mangement/index")
+const PPFwallet = require("../model/PPF-wallet")
 
 const handleDailyPPFbonus =  (async(req, res)=>{
-    const user_id = req.id
+    const {user_id} = req.id
     let query = `SELECT * FROM ppf_wallet WHERE user_id="${user_id}"`;
     connection.query(query, async function(error, data){
       let prev_bal = parseFloat(data[0].balance)
@@ -49,6 +50,4 @@ const handleDailyPPFbonus =  (async(req, res)=>{
 })
 
 
-
-
-module.exports =  {handleDailyPPFbonus, handleUpdateDailyReports}
+module.exports =  {handleDailyPPFbonus}

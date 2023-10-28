@@ -75,7 +75,7 @@ const handleAllCashbacks = (async(req, res)=>{
 })
 
 
-const level_upCard = (async(req, res)=>{
+const handleFlashDrop = (async(req, res)=>{
   const user_id = req.id
 
 })

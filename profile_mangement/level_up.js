@@ -1,8 +1,10 @@
 const { format } = require('date-fns');
+const Transaction = require("../model/transaction")
 const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 const DPP_wallet = require("../model/PPD-wallet")
 const CashBackDB = require("../model/cash_back")
 const ProfileDB = require("../model/Profile")
+const PPFwallet = require("../model/PPF-wallet")
 
 const handelLevelupBonuses = (async(data, user_id)=>{
     const res = await DPP_wallet.find({user_id})
@@ -15,34 +17,40 @@ const handelLevelupBonuses = (async(data, user_id)=>{
     await CashBackDB.updateOne({user_id}, {
         total_level_bonus:new_bal
     })
-        // let trx_rec = {
-        //     user_id: user_id,
-        //     transaction_type: "Level Up", 
-        //     sender_img: "---", 
-        //     sender_name: "DPP_wallet", 
-        //     sender_balance: 0,
-        //     trx_amount:  parseFloat(data),
-        //     receiver_balance: new_bal,
-        //     datetime: currentTime, 
-        //     receiver_name: "PPD",
-        //     receiver_img: "https://www.linkpicture.com/q/dpp_logo.png",
-        //     status: 'successful',
-        //     transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-        //     is_sending: 0
-        //   }
-        //   let sql = `INSERT INTO transactions SET ?`;
-        //   connection.query(sql, trx_rec, (err, RT)=>{
-        //         if(err){
-        //           (err)
-        //         }else{
-        //           (RT)
-        //         }
-        //   })
+    try{
+        let trx_rec = {
+            user_id: user_id,
+            transaction_type: "Level Up", 
+            sender_img: "-", 
+            sender_name: "DPP_wallet", 
+            sender_balance: 0,
+            trx_amount:  parseFloat(data),
+            receiver_balance: new_bal,
+            datetime: currentTime, 
+            receiver_name: "PPD",
+            receiver_img: "https://res.cloudinary.com/dxwhz3r81/image/upload/v1697828435/dpp_logo_sd2z9d.png",
+            status: 'successful',
+            transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+            is_sending: false
+        }
+  await Transaction.create(trx_rec)
+    }
+    catch(error){
+        console.log(error)
+    }
+})
 
+const handlePPFLevelupBonus = (async(user_id)=>{
+   let result =  await PPFwallet.find({user_id})
+    let prev_bal = parseFloat(result[0].balance)
+    await PPFwallet.updateOne({user_id},{
+        balance:prev_bal + 10000
+    })
 })
 
 
 const handelLevelups = (async(data, user_id)=>{
+    handlePPFLevelupBonus(user_id)
     if( data === 2){
         handelLevelupBonuses(0.04, user_id )
     }

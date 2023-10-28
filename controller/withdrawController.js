@@ -1,7 +1,4 @@
-const { connection } = require("../database/index");
-const { Helper } = require("../utils/helperFunction");
-const helper = new Helper();
-const { default: axios } = require("axios");
+const { axios } = require("axios");
 const USDTwallet = require("../model/Usdt-wallet")
 const crypto = require("crypto");
 
@@ -10,7 +7,6 @@ const CC_APP_SECRET = "206aed2f03af1b70305fb11319f2f57b";
 const CCPAYMENT_API_URL = "https://admin.ccpayment.com";
 
 const now = new Date();
-
 const year = now.getFullYear();
 const month = String(now.getMonth() + 1).padStart(2, "0");
 const day = String(now.getDate()).padStart(2, "0");
@@ -19,54 +15,6 @@ const minutes = String(now.getMinutes()).padStart(2, "0");
 const seconds = String(now.getSeconds()).padStart(2, "0");
 
 const formattedDbTimestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
-
-const commission_to_ppd = async (req, res) => {
-  const body = req.body;
-  if (!body.amount) {
-    return res.status(500).json({
-      status: false,
-      message: "Input amount for withdrawal",
-    });
-  }
-
-
-  if (!body.affiliateCode) {
-    return res.status(500).json({
-      status: false,
-      message: "Please provide your affiliateCode",
-    });
-  }
-
-  if (typeof body.amount !== "number") {
-    return res.status(500).json({
-      status: false,
-      message: "Please input a valid number",
-    });
-  }
-
-  const affiliate_balance = await helper.get_affiliateCode_affiliate_balance(
-    req.id,
-    body.affiliateCode
-  );
-
-  const withdrawalAmount = Number(body.amount);
-  try {
-    if (withdrawalAmount > affiliate_balance) {
-      return res.status(500).json({
-        status: false,
-        message: "You can't withdraw more than you have",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "You can't withdraw more than you have",
-    });
-  }
-
-  console.log(affiliate_balance, withdrawalAmount);
-};
 
 const initiateWithdrawal = async (req, res) => {
   try {
@@ -170,6 +118,5 @@ const initiateWithdrawal = async (req, res) => {
 };
 
 module.exports = {
-  commission_to_ppd,
   initiateWithdrawal,
 };

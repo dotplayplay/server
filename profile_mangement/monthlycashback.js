@@ -13,7 +13,6 @@ const handleMonthlyCashback = (async(user_id, amount)=>{
      })
 })
 
-
 const handleClaimMonthlyBonus = (async(req, res)=>{
   let {user_id} = req.id
   try{
