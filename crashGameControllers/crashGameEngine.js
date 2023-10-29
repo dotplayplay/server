@@ -83,24 +83,24 @@ const autobetWallet = (async(event)=>{
       else if(event.token === "USDT"){
         await USDT_wallet.updateOne({ user_id:event.user_id }, {balance: update_bal });
     }
-//  setTimeout(()=>{
-//     let trx_rec = {
-//         user_id: event.user_id,
-//         transaction_type: "Crash-Win", 
-//         sender_img: "---", 
-//         sender_name: "DPP_wallet", 
-//         sender_balance: 0,
-//         trx_amount: win_amount,
-//         receiver_balance: update_bal,
-//         datetime: currentTime, 
-//         receiver_name: event.token,
-//         receiver_img: event.token_img,
-//         status: 'successful',
-//         transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-//         is_sending: 0
-//       }
-//       handleProfileTransactions(trx_rec)
-//  },400)
+ setTimeout(()=>{
+    let trx_rec = {
+        user_id: event.user_id,
+        transaction_type: "Crash-Win", 
+        sender_img: "---", 
+        sender_name: "DPP_wallet", 
+        sender_balance: 0,
+        trx_amount: win_amount,
+        receiver_balance: update_bal,
+        datetime: currentTime, 
+        receiver_name: event.token,
+        receiver_img: event.token_img,
+        status: 'successful',
+        transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+        is_sending: 0
+      }
+      handleProfileTransactions(trx_rec)
+ },400)
 
      io.emit("redball_update_wallet", {update_bal, ...event})
      await CrashGame.updateOne({
@@ -155,25 +155,24 @@ const GetRedtrendWallet = (async(event, game_id)=>{
             await USDT_wallet.updateOne({ user_id:event.user_id }, {balance: update_bal});
         }
 
-
-        //  setTimeout(()=>{
-        //     let trx_rec = {
-        //         user_id: event.user_id,
-        //         transaction_type: "Crash-Win", 
-        //         sender_img: "---", 
-        //         sender_name: "DPP_wallet", 
-        //         sender_balance: 0,
-        //         trx_amount: win_amount,
-        //         receiver_balance: update_bal,
-        //         datetime: currentTime, 
-        //         receiver_name: event.token,
-        //         receiver_img: event.token_img,
-        //         status: 'successful',
-        //         transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-        //         is_sending: 0
-        //       }
-        //       handleProfileTransactions(trx_rec)
-        //  },400)
+         setTimeout(()=>{
+            let trx_rec = {
+                user_id: event.user_id,
+                transaction_type: "Crash-Win", 
+                sender_img: "---", 
+                sender_name: "DPP_wallet", 
+                sender_balance: 0,
+                trx_amount: win_amount,
+                receiver_balance: update_bal,
+                datetime: currentTime, 
+                receiver_name: event.token,
+                receiver_img: event.token_img,
+                status: 'successful',
+                transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+                is_sending: 0
+              }
+              handleProfileTransactions(trx_rec)
+         },400)
 
         await CrashGame.updateOne({
             user_id:event.user_id,
@@ -249,25 +248,24 @@ const GetGreentrendWallet = (async(event, game_id)=>{
       else if(event.token === "USDT"){
         await USDT_wallet.updateOne({ user_id:event.user_id }, {balance: update_bal });
     }
-
-    // setTimeout(()=>{
-    //     let trx_rec = {
-    //         user_id: event.user_id,
-    //         transaction_type: "Crash-Win", 
-    //         sender_img: "---", 
-    //         sender_name: "DPP_wallet", 
-    //         sender_balance: 0,
-    //         trx_amount: win_amount,
-    //         receiver_balance: update_bal,
-    //         datetime: currentTime, 
-    //         receiver_name: event.token,
-    //         receiver_img: event.token_img,
-    //         status: 'successful',
-    //         transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-    //         is_sending: 0
-    //       }
-    //       handleProfileTransactions(trx_rec)
-    //  },400)
+    setTimeout(()=>{
+        let trx_rec = {
+            user_id: event.user_id,
+            transaction_type: "Crash-Win", 
+            sender_img: "---", 
+            sender_name: "DPP_wallet", 
+            sender_balance: 0,
+            trx_amount: win_amount,
+            receiver_balance: update_bal,
+            datetime: currentTime, 
+            receiver_name: event.token,
+            receiver_img: event.token_img,
+            status: 'successful',
+            transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+            is_sending: 0
+          }
+          handleProfileTransactions(trx_rec)
+     },400)
 
     io.emit("redball_update_wallet", {update_bal, ...event})
 
@@ -343,24 +341,24 @@ const GetMoontrendWallet = (async(event, game_id)=>{
         await USDT_wallet.updateOne({ user_id:event.user_id }, {balance: update_bal });
     }
 
-        // setTimeout(()=>{
-        //     let trx_rec = {
-        //         user_id: event.user_id,
-        //         transaction_type: "Crash-Win", 
-        //         sender_img: "---", 
-        //         sender_name: "DPP_wallet", 
-        //         sender_balance: 0,
-        //         trx_amount: win_amount,
-        //         receiver_balance: update_bal,
-        //         datetime: currentTime, 
-        //         receiver_name: event.token,
-        //         receiver_img: event.token_img,
-        //         status: 'successful',
-        //         transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-        //         is_sending: 0
-        //       }
-        //       handleProfileTransactions(trx_rec)
-        //  },400)
+        setTimeout(()=>{
+            let trx_rec = {
+                user_id: event.user_id,
+                transaction_type: "Crash-Win", 
+                sender_img: "---", 
+                sender_name: "DPP_wallet", 
+                sender_balance: 0,
+                trx_amount: win_amount,
+                receiver_balance: update_bal,
+                datetime: currentTime, 
+                receiver_name: event.token,
+                receiver_img: event.token_img,
+                status: 'successful',
+                transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+                is_sending: 0
+              }
+              handleProfileTransactions(trx_rec)
+         },400)
 
         io.emit("redball_update_wallet", {update_bal, ...event})
 
@@ -824,7 +822,7 @@ const handleCrashed = ((crash_point)=>{
 // ====================== initialize the game countdown ============================
 let result = await fetchHashseed()
 if(result){
-    // HandleCountDown(5)
+    HandleCountDown(5)
 }
 
 // ================================================ Game logic =======================================
