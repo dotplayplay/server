@@ -3,9 +3,8 @@ const { format } = require('date-fns');
 const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 const {crashPointFromHash} = require("./hashseed")
 const { handleCrashHistory, handleGameCrash , handleMoonTrendballEl} = require("./crashStore.js")
-const { connection } = require("../database/index")
 const { handleProfileTransactions } = require("../profile_mangement/index")
-const {Helper} = require('../utils/helperFunction')
+
 const { handleRechargeimplement } = require("../profile_mangement/cashbacks")
 const { handleMonthlyCashbackImplementation } = require("../profile_mangement/monthlycashback")
 const { handleWeeklyCashbackImplementation } = require("../profile_mangement/week_cashback")
@@ -14,10 +13,11 @@ const CrashGame = require("../model/crashgame")
 const CrashHistory = require("../model/crash-game-history")
 const Chats = require("../model/public-chat")
 const CashBackDB = require("../model/cash_back")
-
+const DiceGame = require("../model/dice_game")
 const Wallet = require("../model/wallet")
 const USDT_wallet = require("../model/Usdt-wallet")
-const PPFWallet = require("../model/PPF-wallet")
+const PPFWallet = require("../model/PPF-wallet");
+
 
 let is_consumed = 1
 
@@ -824,7 +824,7 @@ const handleCrashed = ((crash_point)=>{
 // ====================== initialize the game countdown ============================
 let result = await fetchHashseed()
 if(result){
-    HandleCountDown(5)
+    // HandleCountDown(5)
 }
 
 // ================================================ Game logic =======================================
@@ -1065,11 +1065,9 @@ if (multiplierEL >= crash_point.crashpoint) {
     }, 100);
 })
 
-const fetchActivePlayers = (()=>{
-    let query1 = `SELECT * FROM  dice_game`;
-    connection.query(query1, async function(error, data){
-        io.emit("dice-gamePLayers", data)
-    })
+const fetchActivePlayers = (async()=>{
+    let data = await DiceGame.find()
+     io.emit("dice-gamePLayers", data)
 })
 
 setInterval(()=>{

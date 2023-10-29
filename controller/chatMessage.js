@@ -1,4 +1,3 @@
-const { connection } = require("../database/index")
 
 const str = 'abcde @';
 

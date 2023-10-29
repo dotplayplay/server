@@ -1,10 +1,7 @@
-const { connection } = require("../database/index")
 const AffiliateDB = require("../model/affiliate_codes")
 const { format } = require('date-fns');
 const { genAffiliate } = require('../utils/genAffiliate');
 const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-const {Helper} = require('../utils/helperFunction')
-const helper = new Helper()
 const ProfileBD = require("../model/Profile")
 
 const CreateAffiliate = (async(user_id)=>{

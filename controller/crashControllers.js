@@ -1,4 +1,3 @@
-const { connection } = require("../database/index")
 const { format } = require('date-fns');
 const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 const { handleWagerIncrease, handleProfileTransactions } = require("../profile_mangement/index")
@@ -11,18 +10,18 @@ const PPFWallet = require("../model/PPF-wallet")
 const PPLWallet = require("../model/PPL-wallet")
 
 const updateUserWallet = (async(data)=>{
-  await Wallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
+  await Wallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
   if(data.bet_token_name === "PPF"){
-    await PPFWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
+    await PPFWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
   }
   else if(data.bet_token_name === "USDT"){
-    await USDT_wallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
+    await USDT_wallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
   }
   else if(data.bet_token_name === "PPD"){
-    await PPDWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
+    await PPDWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
   }
   else if(data.bet_token_name === "PPL"){
-    await PPLWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
+    await PPLWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
 }
 })
 const CraeatBetGame = (async(data)=>{
@@ -89,9 +88,9 @@ const handleCrashBet = (async(req, res)=>{
     }else{
       hidden = 0
     }
-    let previous_bal = result[0].balance
+    let previous_bal = parseFloat(result[0].balance)
     let bet_amount = sent_data.bet_amount
-    let current_amount = previous_bal - bet_amount
+    let current_amount = (previous_bal - bet_amount).toFixed(6)
       CraeatBetGame({...sent_data, hidden, user_id, game_type, current_amount})
       updateUserWallet({current_amount, ...sent_data, user_id})
     res.status(200).json({...sent_data,current_amount, bet_amount})
@@ -133,7 +132,7 @@ const handleCashout = (async(req, res)=>{
   let sent_data = data
   try {
     let result = await Wallet.find({user_id})
-    let previous_bal = result[0].balance
+    let previous_bal = parseFloat(result[0].balance)
     let stopped_amount = sent_data.cashout_at
     let current_amount = (previous_bal + stopped_amount).toFixed(4)
     handleUpdateCrashState({...sent_data, user_id, current_amount:current_amount, stopped_amount })
@@ -164,10 +163,9 @@ const handleRedTrendball = (async(req, res)=>{
         hidden = 0
       }
 
-      CraeatBetGame({...sent_data,hidden, user_id, current_amount})
-      updateUserWallet({current_amount, ...sent_data, user_id})
+    CraeatBetGame({...sent_data,hidden, user_id, current_amount})
+    updateUserWallet({current_amount, ...sent_data, user_id})
     res.status(200).json({...sent_data,current_amount, bet_amount})
-      // res.status(200).json({...sent_data,current_amount, bet_amount})
   } catch (err) {
     res.status(501).json({ message: err.message });
     console.log(err)

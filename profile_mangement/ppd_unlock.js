@@ -1,4 +1,3 @@
-const { connection } = require("../database/index")
 const PPDunlockDB = require("../model/ppd_unlock")
 const PPD_wallet = require("../model/PPD-wallet")
 

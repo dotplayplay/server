@@ -1,4 +1,3 @@
-const { connection } = require("../database/index")
 const ProfileDB = require("../model/Profile")
 
 const handelLevelupBonuses = ((bonus, user_id)=>{
@@ -220,33 +219,33 @@ const handleAffiliateCommission = ((user_id, bet_amount , crypto)=>{
 
 
 const handleUpdateCommision = ((user_id)=>{
-    let query5 = `SELECT * FROM affiliate_code WHERE user_id="${user_id}"`;
-    connection.query(query5, async function(error, refss){
-        let yesterday_bonus = parseFloat(refss[0].today_commission)
-        let prev_bonus = parseFloat(refss[0].commission_reward)
-        let sql2 = `UPDATE affiliate_code SET today_commission="${0}", commission_reward="${yesterday_bonus + prev_bonus}" WHERE user_id="${user_id}"`;
-        connection.query(sql2, function (err, result){
-            if (err) throw err;
-        })
-        let sql1 = `UPDATE affiliate_commission_reward SET is_consumed="${1}" WHERE user_id="${user_id}"`;
-        connection.query(sql1, function (err, result){
-            if (err) throw err;
-        })
-    })
+    // let query5 = `SELECT * FROM affiliate_code WHERE user_id="${user_id}"`;
+    // connection.query(query5, async function(error, refss){
+    //     let yesterday_bonus = parseFloat(refss[0].today_commission)
+    //     let prev_bonus = parseFloat(refss[0].commission_reward)
+    //     let sql2 = `UPDATE affiliate_code SET today_commission="${0}", commission_reward="${yesterday_bonus + prev_bonus}" WHERE user_id="${user_id}"`;
+    //     connection.query(sql2, function (err, result){
+    //         if (err) throw err;
+    //     })
+    //     let sql1 = `UPDATE affiliate_commission_reward SET is_consumed="${1}" WHERE user_id="${user_id}"`;
+    //     connection.query(sql1, function (err, result){
+    //         if (err) throw err;
+    //     })
+    // })
 })
 
 const handleCommissionCalculation = (()=>{
-    let query5 = `SELECT * FROM affiliate_commission_reward WHERE is_consumed="${0}"`;
-    connection.query(query5, async function(error, refss){
-        let now = new Date()
-        for(let i = 0; i < refss.length; i++){
-            let time = refss[i].time
-            if(time.getDate() !== now.getDate()){
-                let user = refss[i].user_id
-                handleUpdateCommision(user)
-            }
-        }
-    })
+    // let query5 = `SELECT * FROM affiliate_commission_reward WHERE is_consumed="${0}"`;
+    // connection.query(query5, async function(error, refss){
+    //     let now = new Date()
+    //     for(let i = 0; i < refss.length; i++){
+    //         let time = refss[i].time
+    //         if(time.getDate() !== now.getDate()){
+    //             let user = refss[i].user_id
+    //             handleUpdateCommision(user)
+    //         }
+    //     }
+    // })
 })
 // setInterval(() => handleCommissionCalculation(), 6000);
 

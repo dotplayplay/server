@@ -1,9 +1,11 @@
-const { connection } = require("../database/index")
 const Profile = require("../model/Profile")
 const { handleProfileTransactions } = require("../profile_mangement/index")
 const { format } = require('date-fns');
 const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 const PPFWallet = require("../model/PPF-wallet")
+const Wallet = require("../model/wallet")
+const CrashGame = require("../model/crashgame")
+const DiceGame = require("../model/dice_game")
 
 const createProfile = (async(email,username, invited_code, user_id )=>{
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -113,14 +115,13 @@ const SingleUser = (async(req, res)=>{
 
 
 const handleHiddenProfile = (async(req, res)=>{
-  const user_id = req.id
+  const {user_id} = req.id
   const { profile_state } = req.body
   try{
-    let sql = `UPDATE profiles SET hide_profile="${profile_state}" WHERE user_id="${user_id}"`;
-    connection.query(sql, function (err, result) {
-      if (err) throw err;
-      res.status(200).json(result)
-    });
+   let response = await Profile.updateOne({user_id},{
+      hide_profile: profile_state
+    })
+      res.status(200).json(response)
   }
   catch(error){
     console.log(error)
@@ -129,14 +130,13 @@ const handleHiddenProfile = (async(req, res)=>{
 
 
 const handleRefusefriendRequest = (async(req, res)=>{
-  const user_id = req.id
+  const {user_id} = req.id
   const { profile_state } = req.body
   try{
-    let sql = `UPDATE profiles SET refuse_friends_request="${profile_state}" WHERE user_id="${user_id}"`;
-    connection.query(sql, function (err, result) {
-      if (err) throw err;
-      res.status(200).json(result)
-    });
+    let response = await Profile.updateOne({user_id},{
+      refuse_friends_request: profile_state
+    })
+      res.status(200).json(response)
   }
   catch(error){
     console.log(error)
@@ -144,14 +144,13 @@ const handleRefusefriendRequest = (async(req, res)=>{
 })
 
 const handleRefuseTip = (async(req, res)=>{
-  const user_id = req.id
+  const {user_id} = req.id
   const { profile_state } = req.body
   try{
-    let sql = `UPDATE profiles SET refuse_tips="${profile_state}" WHERE user_id="${user_id}"`;
-    connection.query(sql, function (err, result) {
-      if (err) throw err;
-      res.status(200).json(result)
-    });
+    let response = await Profile.updateOne({user_id},{
+      refuse_tips: profile_state
+    })
+      res.status(200).json(response)
   }
   catch(error){
     console.log(error)
@@ -159,32 +158,25 @@ const handleRefuseTip = (async(req, res)=>{
 })
 
 const handlePublicUsername = (async(req, res)=>{
-  const user_id = req.id
+  const {user_id} = req.id
   const { profile_state } = req.body
   try{
-    let sql = `UPDATE profiles SET hidden_from_public="${profile_state}" WHERE user_id="${user_id}"`;
-    connection.query(sql, function (err, result) {
-      if (err) throw err;
-    (result)
-    });
+    await Profile.updateOne({user_id},{
+      hidden_from_public: profile_state
+    })
 
-    let sql2 = `UPDATE wallet SET hidden_from_public="${profile_state}" WHERE user_id="${user_id}"`;
-    connection.query(sql2, function (err, result) {
-      if (err) throw err;
-    (result)
-    });
+    await Wallet.updateOne({user_id},{
+      hidden_from_public: profile_state
+    })
 
-    let sql22= `UPDATE crash_game SET hidden_from_public="${profile_state}" WHERE user_id="${user_id}"`;
-    connection.query(sql22, function (err, result) {
-      if (err) throw err;
-    (result)
-    });
+    await CrashGame.updateOne({user_id},{
+      hidden_from_public: profile_state
+    })
 
-    let sql23= `UPDATE dice_game SET hidden_from_public="${profile_state}" WHERE user_id="${user_id}"`;
-    connection.query(sql23, function (err, result) {
-      if (err) throw err;
+    let result = await DiceGame.updateOne({user_id},{
+      hidden_from_public: profile_state
+    })
       res.status(200).json(result)
-    });
   }
   catch(error){
     console.log(error)
@@ -206,23 +198,22 @@ const handleDailyPPFbonus =  (async(req, res)=>{
      });
   }
 
-
-    //     let trx_rec = {
-    //       user_id,
-    //       transaction_type: "PPF daily bonus", 
-    //       sender_img: "---", 
-    //       sender_name: "DPP_wallet", 
-    //       sender_balance: 0,
-    //       trx_amount: 20000,
-    //       receiver_balance: prev_bal + 20000,
-    //       datetime: currentTime, 
-    //       receiver_name: "PPF",
-    //       receiver_img: "https://www.linkpicture.com/q/ppf_logo.png",
-    //       status: 'successful',
-    //       transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-    //       is_sending: 0
-    //     }
-    //     handleProfileTransactions(trx_rec)
+  let trx_rec = {
+    user_id,
+    transaction_type: "PPF daily bonus", 
+    sender_img: "---", 
+    sender_name: "DPP_wallet", 
+    sender_balance: 0,
+    trx_amount: 20000,
+    receiver_balance: prev_bal + 20000,
+    datetime: currentTime, 
+    receiver_name: "PPF",
+    receiver_img: "https://res.cloudinary.com/dxwhz3r81/image/upload/v1697828376/ppf_logo_ntrqwg.png",
+    status: 'successful',
+    transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+    is_sending: 0
+  }
+  handleProfileTransactions(trx_rec)
 
 })
 

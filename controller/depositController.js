@@ -156,6 +156,7 @@ const confirmDeposit = async () => {
     let usersID = []
     let deoop = await DepositRequest.find()
     if(deoop > 0){
+
       deoop.forEach(element => {
         if(element.status === "Pending"){
           usersID.push(element.merchant_order_id)
@@ -181,6 +182,7 @@ const confirmDeposit = async () => {
           headers: headers,
         }
       );
+
       let result = response.data.data
       if(usersID.length > 0){
         result.forEach(element => {
@@ -197,7 +199,6 @@ const confirmDeposit = async () => {
   } catch (error) {
     console.error("Error confirming deposit:", error);
   }
-  console.log()
 }
 
 setInterval(() => {

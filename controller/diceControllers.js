@@ -1,4 +1,3 @@
-const { connection } = require("../database/index")
 const crypto = require('crypto');
 const { handleWagerIncrease, handleProfileTransactions } = require("../profile_mangement/index")
 const DiceEncription = require("../model/dice_encryped_seeds")
@@ -10,12 +9,11 @@ const PPFWallet = require("../model/PPF-wallet")
 let nonce = 0
 let maxRange = 100
 const { format } = require('date-fns');
-const { Http2ServerResponse } = require("http2");
 const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 const salt = 'Qede00000000000w00wd001bw4dc6a1e86083f95500b096231436e9b25cbdd0075c4';
-function generateRandomNumber(serverSeed, clientSeed) {
-    nonce += 1
-  const combinedSeed = `${serverSeed}-${clientSeed}-${nonce}`;
+function generateRandomNumber(serverSeed, clientSeed, hash) {
+  nonce += 1
+  const combinedSeed = `${serverSeed}-${clientSeed}-${hash}-${nonce}`;
   const hmac = crypto.createHmac('sha256', combinedSeed);
   const hmacHex = hmac.digest('hex');
   const decimalValue = (parseInt(hmacHex , 32) % 10001 / 100)
@@ -26,7 +24,6 @@ function generateRandomNumber(serverSeed, clientSeed) {
 
 
 const updateUserWallet = (async(data)=>{
-
   await Wallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
   if(data.bet_token_name === "PPF"){
     await PPFWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount });
@@ -42,111 +39,109 @@ const handleDiceBet = (async(req,res)=>{
     let {sent_data} = req.body
 
     const GetEncryptedSeeds = (async(user_id)=>{
+      const CraeatBetGame = (async(data)=>{
+        let date = new Date();
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        let newformat = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        let time = (hours + ':' + minutes + ' ' + newformat);
 
-        const CraeatBetGame = (async(data)=>{
-          let date = new Date();
-          let hours = date.getHours();
-          let minutes = date.getMinutes();
-          let newformat = hours >= 12 ? 'PM' : 'AM';
-          hours = hours % 12;
-          hours = hours ? hours : 12;
-          minutes = minutes < 10 ? '0' + minutes : minutes;
-          let time = (hours + ':' + minutes + ' ' + newformat);
-
-            let bet = {
-              user_id: data.user_id,
-              username: data.username,
-              profile_img: data.user_img,
-              bet_amount: data.bet_amount,
-              token: data.bet_token_name,
-              token_img:data.bet_token_img,
-              bet_id: Math.floor(Math.random()*10000000)+ 72000000,
-              game_nonce: nonce,
-              cashout: parseFloat(data.io.point),
-              profit: data.payoutIO,
-              client_seed: data.io.client_seed,
-              server_seed: data.io.server_seed,
-              time: time,
-              hidden_from_public: data.hidden,
-              payout: data.payout,
-              has_won : data.has_won,
-              chance: data.chance,
-              time_date: currentTime
-            }
-            let wallet = {
-                coin_name: data.bet_token_name,
-                coin_image:  data.bet_token_img,
-                balance:  parseFloat(data.current_amount).toFixed(4),
-            }
+        let bet = {
+          user_id: data.user_id,
+          username: data.username,
+          profile_img: data.user_img,
+          bet_amount: data.bet_amount,
+          token: data.bet_token_name,
+          token_img:data.bet_token_img,
+          bet_id: Math.floor(Math.random()*10000000)+ 72000000,
+          game_nonce: nonce,
+          cashout: parseFloat(data.io.point),
+          profit: data.payoutIO,
+          client_seed: data.io.client_seed,
+          server_seed: data.io.server_seed,
+          time: time,
+          hidden_from_public: data.hidden,
+          payout: data.payout,
+          has_won : data.has_won,
+          chance: data.chance,
+          time_date: currentTime
+        }
+        let wallet = {
+            coin_name: data.bet_token_name,
+            coin_image:  data.bet_token_img,
+            balance:  parseFloat(data.current_amount).toFixed(4),
+        }
            let previusGame = await DiceGame.find({user_id})
            let result = await DiceGame.create(bet)
             res.status(200).json({history:[...previusGame, result], wallet,point: parseFloat(data.io.point)})
 
-
-            // let trx_rec = {
-            //   user_id: data.user_id,
-            //   transaction_type: data.has_won ? "Classic Dice-Win" : "Classic Dice-Betting", 
-            //   sender_img: "", 
-            //   sender_name: "DPP_wallet", 
-            //   sender_balance: 0,
-            //   trx_amount: data.has_won ? data.payoutIO : data.bet_amount,
-            //   receiver_balance: data.current_amount,
-            //   datetime: currentTime, 
-            //   receiver_name: data.bet_token_name,
-            //   receiver_img: data.bet_token_img,
-            //   status: 'successful',
-            //   transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-            //   is_sending: 0
-            // }
-            // handleProfileTransactions(trx_rec)
-          })
+            let trx_rec = {
+              user_id: data.user_id,
+              transaction_type: data.has_won ? "Classic Dice-Win" : "Classic Dice-Betting", 
+              sender_img: "-", 
+              sender_name: "DPP_wallet", 
+              sender_balance: 0,
+              trx_amount: data.has_won ? data.payoutIO : data.bet_amount,
+              receiver_balance: data.current_amount,
+              datetime: currentTime, 
+              receiver_name: data.bet_token_name,
+              receiver_img: data.bet_token_img,
+              status: 'successful',
+              transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+              is_sending: 0
+            }
+            handleProfileTransactions(trx_rec)
+        })
 
         let hidden;
         let response =  await DiceEncription.find({user_id})
-        let server = response[0].server_seed
-        let client = response[0].client_seed
+        let server = response[response.length - 1].server_seed
+        let client = response[response.length - 1].client_seed
+        let hash = response[response.length - 1].hash_seed
 
-          if(sent_data.bet_token_name !== "PPF"){
-            handleWagerIncrease(user_id, sent_data.bet_amount, sent_data.bet_token_img)
-          }
+        if(sent_data.bet_token_name !== "PPF"){
+          handleWagerIncrease(user_id, sent_data.bet_amount, sent_data.bet_token_img)
+        }
 
-          const randomResult = generateRandomNumber(server, client);
+        const randomResult = generateRandomNumber(server, client, hash);
 
           if(parseFloat(sent_data.chance) > parseFloat(randomResult.point)){
             try {
               let sjbhsj = await Wallet.find({user_id})
-                if(sjbhsj[0].hidden_from_public){
-                    hidden = true
-                  }else{
-                    hidden = false
-                }
+              if(sjbhsj[0].hidden_from_public){
+                  hidden = true
+                }else{
+                  hidden = false
+              }
                 let previous_bal = parseFloat(sjbhsj[0].balance)
                 let wining_amount = parseFloat(sent_data.wining_amount)
-                let current_amount = previous_bal + wining_amount
+                let current_amount = (previous_bal + wining_amount).toFixed(4)
 
-                updateUserWallet({current_amount, ...sent_data, user_id})
-                CraeatBetGame({...sent_data, user_id, payoutIO:wining_amount,hidden,  has_won : true, io: randomResult, current_amount})
+              updateUserWallet({current_amount, ...sent_data, user_id})
+              CraeatBetGame({...sent_data, user_id, payoutIO:wining_amount,hidden,  has_won : true, io: randomResult, current_amount})
             } catch (err) {
               res.status(501).json({ message: err.message });
             }
           }else{
-              try {
-                let response =  await Wallet.find({user_id})
-                  if(response[0].hidden_from_public){
-                    hidden = true
-                  }else{
-                    hidden = false
-                  }
-                let previous_bal = parseFloat(response[0].balance)
-                let bet_amount = parseFloat(sent_data.bet_amount)
-                let current_amount = previous_bal - bet_amount
-                CraeatBetGame({...sent_data, user_id,payoutIO:0,hidden, has_won : false, io: randomResult, current_amount})
-                updateUserWallet({current_amount, ...sent_data, user_id})
-              } catch (err) {
-                res.status(501).json({ message: err.message });
+          try {
+            let response =  await Wallet.find({user_id})
+              if(response[0].hidden_from_public){
+                hidden = true
+              }else{
+                hidden = false
               }
+            let previous_bal = parseFloat(response[0].balance)
+            let bet_amount = parseFloat(sent_data.bet_amount)
+            let current_amount = (previous_bal - bet_amount).toFixed(4)
+            CraeatBetGame({...sent_data, user_id,payoutIO:0,hidden, has_won : false, io: randomResult, current_amount})
+            updateUserWallet({current_amount, ...sent_data, user_id})
+          } catch (err) {
+            res.status(501).json({ message: err.message });
           }
-     
+        }
     })
   
   if(sent_data.bet_amount < 0.2){
@@ -174,11 +169,11 @@ const handleHashGeneration = (()=>{
     let client_seed = data
     let server_seed = handleHashGeneration()
     nonce = 0
-    let sql2 = `UPDATE dice_encryped_seeds SET server_seed="${server_seed}", client_seed="${client_seed}",  updated_at="${currentTime}"  WHERE user_id="${user_id}"`;
-    connection.query(sql2, function (err, result) {
-      if (err) throw err;
-      (result)
-    });
+    await DiceEncription.updateOne({user_id},{
+      server_seed:server_seed,
+      client_seed:client_seed,
+      updated_at:currentTime
+    })
     res.status(200).json("Updated sucessfully")
   }
   catch(err){
@@ -216,18 +211,20 @@ const InitializeDiceGame = (async(user_id)=>{
   
   const salt = 'Qede00000000000w00wd001bw4dc6a1e86083f95500b096231436e9b25cbdd0075c4';
   
-  const handleHashGeneration = (()=>{
+const handleHashGeneration = (()=>{
       const serverSeed = crypto.randomBytes(32).toString('hex');
       const clientSeed = generateString(23);
       const combinedSeed = serverSeed + salt + clientSeed;
       const hash = crypto.createHash('sha256').update(combinedSeed).digest('hex');
-      let encrypt = { hash, clientSeed }
+      let encrypt = { hash, clientSeed, serverSeed }
       return encrypt
   })
     let data = {
         user_id: user_id,
-        server_seed: handleHashGeneration().hash,
-        client_seed: handleHashGeneration().clientSeed,
+        server_seed: handleHashGeneration().serverSeed,
+        hash_seed: handleHashGeneration().hash,
+        client_seed:handleHashGeneration().clientSeed,
+        is_open:false,
         updated_at: currentTime
     }
      await DiceEncription.create(data)

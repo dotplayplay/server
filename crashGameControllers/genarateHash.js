@@ -27,9 +27,9 @@ const hashInput = async(input, times)=> {
             console.log("Generated hashes completed")
             clearInterval(inter)
         }
-    },1000)
+    },50)
 }
 
-const input = `d71e0f071db39ecf8f1331ddfa58c073d267ee9388c4c4c967918a721f032042` // Replace with your actual input
+const input = `13d64828e4187853581fdaf22758c13843bbb91e518c67a44c6b55a1cc3e3a5a` // Replace with your actual input
 const numberOfTimesToHash =  300000;
 //  hashInput(input, numberOfTimesToHash);

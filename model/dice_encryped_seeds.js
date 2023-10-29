@@ -5,7 +5,6 @@ const Userschema = new schema({
     user_id: {
         type: String,
         required: true,
-        unique : true
     },
     server_seed: {
         type: String,
@@ -13,6 +12,14 @@ const Userschema = new schema({
     },
     client_seed: {
         type: String,
+        required: true,
+    },
+    hash_seed: {
+        type: String,
+        required: true,
+    },
+    is_open: {
+        type: Boolean,
         required: true,
     },
     updated_at: {

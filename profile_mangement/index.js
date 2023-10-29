@@ -1,4 +1,3 @@
-const { connection } = require("../database/index")
 const { handelLevelups  } = require("./level_up")
 const { handleRechargeCashback } = require("./rechargebonus")
 const { handleWeeklyCashback } = require("./week_cashback")
@@ -7,6 +6,7 @@ const ProfileDB = require("../model/Profile")
 const { handleMonthlyCashback } = require("./monthlycashback")
 const { handleAffiliateRewards, handleAffiliateCommission, handleProgressPercentage } = require("../profile_mangement/affilliate-system")
 const { unlockedPPD } = require("./ppd_unlock")
+const transaction = require("../model/transaction")
 
 const handleWagerIncrease = (async(user_id, bet_amount, crypto)=>{
      let data = await CashBackDB.find({user_id})
@@ -576,15 +576,8 @@ const handleWagerIncrease = (async(user_id, bet_amount, crypto)=>{
 })
 
 
-const handleProfileTransactions = ((sent)=>{
-  let sql = `INSERT INTO transactions SET ?`;
-  connection.query(sql, sent, (err, data)=>{
-        if(err){
-          (err)
-        }else{
-          (data)
-        }
-  })
+const handleProfileTransactions = (async(sent)=>{
+  await transaction.create(sent)
 })
 
 

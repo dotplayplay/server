@@ -14,7 +14,6 @@ const Userschema = new schema({
         type: Number,
         required: true,
     }
-  
 }, { timestamp : true})
 
 module.exports = mongoose.model('Crash_game_history', Userschema)
