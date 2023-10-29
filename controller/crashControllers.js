@@ -22,7 +22,7 @@ const updateUserWallet = (async(data)=>{
   }
   else if(data.bet_token_name === "PPL"){
     await PPLWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
-}
+  }
 })
 const CraeatBetGame = (async(data)=>{
   let bet = {
@@ -47,23 +47,22 @@ const CraeatBetGame = (async(data)=>{
     has_won : 0 ,
     chance: data.chance
   }
-
-  // let trx_rec = {
-  //   user_id: data.user_id,
-  //   transaction_type: "Crash-Betting", 
-  //   sender_img: data.bet_token_img, 
-  //   sender_name: data.bet_token_name, 
-  //   sender_balance: data.current_amount,
-  //   trx_amount:  data.bet_amount,
-  //   receiver_balance: 0,
-  //   datetime: currentTime, 
-  //   receiver_name: 'DPP_wallet',
-  //   receiver_img: "---",
-  //   status: 'successful',
-  //   transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-  //   is_sending: 1
-  // }
-  // handleProfileTransactions(trx_rec)
+  let trx_rec = {
+    user_id: data.user_id,
+    transaction_type: "Crash-Betting", 
+    sender_img: data.bet_token_img, 
+    sender_name: data.bet_token_name, 
+    sender_balance: data.current_amount,
+    trx_amount:  data.bet_amount,
+    receiver_balance: 0,
+    datetime: currentTime, 
+    receiver_name: 'DPP_wallet',
+    receiver_img: "-",
+    status: 'successful',
+    transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+    is_sending: 1
+  }
+  handleProfileTransactions(trx_rec)
 try {
  let result = await crash_game.create(bet)
 } catch (err) {
