@@ -3,6 +3,7 @@ const cors = require("cors");
 const mongoose = require('mongoose')
 require("./crashGameControllers/genarateHash")
 require("./crashGameControllers/generate-seed")
+const AllPLays = require("./routes/admin/PLayers/crashPlayers");
 // const VerifyGames = require("./routes/admin/games/crash");
 const AdminDiceGame = require("./routes/admin/games/dice-games");
 // const AdminStat = require("./routes/admin/statistic/statistics");
@@ -65,6 +66,7 @@ app.use("/api/cashback", Bonus)
 
 // Admin routes
 app.use("/admin/all-dice-game", AdminDiceGame);
+app.use("/admin/all-players", AllPLays);
 // app.use("/admin/verify", VerifyGames);
 
 app.get("/", (req, res)=>{

@@ -571,7 +571,8 @@ const handleWagerIncrease = (async(user_id, bet_amount, crypto)=>{
         next_level_point:next_hit
        })
        await ProfileDB.updateOne({user_id},{
-        total_wagered:total_wagered
+        total_wagered:total_wagered,
+        next_level_point:next_hit
        })
 })
 

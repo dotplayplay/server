@@ -33,6 +33,7 @@ const createProfile = (async(email,username, invited_code, user_id )=>{
     vip_level: 0,
     kyc_is_activated: false,
     phone: "-",
+    next_level_point:1,
     total_wagered: 0,
     invited_code: invited_code ? invited_code : "-",
     google_auth_is_activated : false,
