@@ -1,5 +1,6 @@
 const CrashGame = require("../model/crashgame")
 
+
 const GetAllPlayersByGameId = (async(req, res)=>{
     const id = req.body
     try{
