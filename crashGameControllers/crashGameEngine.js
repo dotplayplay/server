@@ -38,7 +38,7 @@ const fetchHashseed = (async()=>{
 const io = new Server(httpServer, {
     cors: {
         origin:"https://dotplayplay.netlify.app",
-        // origin: "http://localhost:5173" 
+        //origin: "http://localhost:5173" 
     },
 });
 
