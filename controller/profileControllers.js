@@ -81,6 +81,7 @@ const UpdateProfile = (async(req, res)=>{
 const UpdateUser = (async(req, res)=>{
     const {user_id} = req.id;
     const {data} = req.body
+    console.log(data)
     if (!user_id) {
       res.status(500).json({ error: "No user found" });
     } 
@@ -88,7 +89,7 @@ const UpdateUser = (async(req, res)=>{
       try{
        await Profile.updateOne({ user_id }, {
         username: data.username,
-        profile_image: data.profile_img,
+        profile_image: data.profile_image,
        });
        res.status(200).json({message: "Updated succesfully"})
       }
