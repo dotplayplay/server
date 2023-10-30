@@ -214,7 +214,7 @@ const handleDailyPPFbonus =  (async(req, res)=>{
     is_sending: 0
   }
   handleProfileTransactions(trx_rec)
-
+  res.status(200).json({message: "daily ppf added successfully"})
 })
 
 module.exports = { SingleUser, UpdateUser, UpdateProfile,handleHiddenProfile , handlePublicUsername, handleRefusefriendRequest, handleRefuseTip, handleDailyPPFbonus, createProfile }
