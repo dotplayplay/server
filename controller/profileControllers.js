@@ -185,36 +185,42 @@ const handlePublicUsername = (async(req, res)=>{
 
 const handleDailyPPFbonus =  (async(req, res)=>{
   const {user_id} = req.id
-  let result = await PPFWallet.find({user_id})
-  let prev_bal = result[0].balance
-  let pre_date = result[0].date
-  let now = new Date()
-  let yesterdy = new Date(pre_date)
-
-  if(yesterdy.getDate() !== now.getDate()){
-    await PPFWallet.updateOne({ user_id }, {
-      balance: prev_bal + 20000,
-      date:now
-     });
+  try{
+    let result = await PPFWallet.find({user_id})
+    let prev_bal = result[0].balance
+    let pre_date = result[0].date
+    let now = new Date()
+    let yesterdy = new Date(pre_date)
+  
+    if(yesterdy.getDate() !== now.getDate()){
+      await PPFWallet.updateOne({ user_id }, {
+        balance: prev_bal + 20000,
+        date:now
+       });
+    }
+  
+    let trx_rec = {
+      user_id,
+      transaction_type: "PPF daily bonus", 
+      sender_img: "---", 
+      sender_name: "DPP_wallet", 
+      sender_balance: 0,
+      trx_amount: 20000,
+      receiver_balance: prev_bal + 20000,
+      datetime: currentTime, 
+      receiver_name: "PPF",
+      receiver_img: "https://res.cloudinary.com/dxwhz3r81/image/upload/v1697828376/ppf_logo_ntrqwg.png",
+      status: 'successful',
+      transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
+      is_sending: 0
+    }
+    handleProfileTransactions(trx_rec)
+    res.status(200).json({message: "daily ppf added successfully"})
+  }
+  catch(err){
+    res.status(500).json({error: err})
   }
 
-  let trx_rec = {
-    user_id,
-    transaction_type: "PPF daily bonus", 
-    sender_img: "---", 
-    sender_name: "DPP_wallet", 
-    sender_balance: 0,
-    trx_amount: 20000,
-    receiver_balance: prev_bal + 20000,
-    datetime: currentTime, 
-    receiver_name: "PPF",
-    receiver_img: "https://res.cloudinary.com/dxwhz3r81/image/upload/v1697828376/ppf_logo_ntrqwg.png",
-    status: 'successful',
-    transaction_id: Math.floor(Math.random()*1000000000)+ 100000000,
-    is_sending: 0
-  }
-  handleProfileTransactions(trx_rec)
-  res.status(200).json({message: "daily ppf added successfully"})
 })
 
 module.exports = { SingleUser, UpdateUser, UpdateProfile,handleHiddenProfile , handlePublicUsername, handleRefusefriendRequest, handleRefuseTip, handleDailyPPFbonus, createProfile }
