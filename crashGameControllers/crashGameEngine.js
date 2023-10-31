@@ -41,7 +41,6 @@ const io = new Server(httpServer, {
     },
 });
 
-
 // ==================== fetch single active users bets ==================================
 const fetchUsersBets = (async()=>{
     const data = await CrashGame.find()

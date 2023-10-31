@@ -77,7 +77,7 @@ app.get("/", (req, res)=>{
 mongoose.set('strictQuery', false);
 
 // connect database
-const dbUri = `mongodb+srv://ValiantCodez:es2Iltc8hwDuBF5m@cluster0.gutge9q.mongodb.net/dotplayplay?retryWrites=true&w=majority`;
+const dbUri = `mongodb+srv://valiantjoe:emgSaXVP1NaOGz1b@highscore.muku4gg.mongodb.net/dotplayplay?retryWrites=true&w=majority`;
 mongoose.connect(dbUri, { useNewUrlParser: true,  useUnifiedTopology: true })
     .then((result)=>  console.log('Database connected'))
     .catch((err)=> console.log(err))
