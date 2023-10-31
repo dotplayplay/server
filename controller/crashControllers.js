@@ -41,7 +41,7 @@ const CraeatBetGame = (async(data)=>{
     game_type: data.game_type,
     user_status: 1,
     game_status: 1,
-    time: currentTime,
+    time: data.time,
     payout: 0.0000,
     has_won : 0 ,
     chance: data.chance

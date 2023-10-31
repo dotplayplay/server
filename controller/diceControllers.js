@@ -40,15 +40,6 @@ const handleDiceBet = (async(req,res)=>{
 
     const GetEncryptedSeeds = (async(user_id)=>{
       const CraeatBetGame = (async(data)=>{
-        let date = new Date();
-        let hours = date.getHours();
-        let minutes = date.getMinutes();
-        let newformat = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        let time = (hours + ':' + minutes + ' ' + newformat);
-
         let bet = {
           user_id: data.user_id,
           username: data.username,
@@ -62,12 +53,11 @@ const handleDiceBet = (async(req,res)=>{
           profit: data.payoutIO,
           client_seed: data.io.client_seed,
           server_seed: data.io.server_seed,
-          time: time,
+          time: data.time,
           hidden_from_public: data.hidden,
           payout: data.payout,
           has_won : data.has_won,
-          chance: data.chance,
-          time_date: currentTime
+          chance: data.chance
         }
         let wallet = {
             coin_name: data.bet_token_name,

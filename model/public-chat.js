@@ -34,10 +34,6 @@ const Userschema = new schema({
         type: String,
         required: true,
     },
-    sent_at: {
-        type: String,
-        required: true,
-    },
     vip_level: {
         type: Number,
         required: true,

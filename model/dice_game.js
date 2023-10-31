@@ -67,13 +67,9 @@ const Userschema = new schema({
         required: true,
     },
     time: {
-        type: String,
-        required: true,
-    },
-    time_date: {
         type: Date,
         required: true,
-    },
+    }
 }, { timestamp : true})
 
 module.exports = mongoose.model('Dice_game', Userschema)
