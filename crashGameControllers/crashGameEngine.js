@@ -815,7 +815,6 @@ const handleCrashed = ((crash_point)=>{
     h_four = 38
     h_six = 58
     h_two = 18
-
 })
 
 // ====================== initialize the game countdown ============================
