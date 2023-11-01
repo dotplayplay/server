@@ -41,10 +41,10 @@ const handleCashReturn = (async(user_id, cash)=>{
 
 const handleWeeklyCashbackImplementation = (async()=>{
   let data = await CashBackDB.find()
+  let vip_level = element.vip_level
+  let user_id = element.user_id
   data.forEach(element => {
     if(element.week_cashback > 1000){
-      let vip_level = element.vip_level
-      let user_id = element.user_id
       let cash;
       let weekly_cashback = element.week_cashback
       if(vip_level < 38){

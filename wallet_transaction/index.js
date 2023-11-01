@@ -55,7 +55,7 @@ const createPPF = (async(user_id)=>{
 // ================ store PPF wallet  details===================
 const createPPL = (async(user_id)=>{
     let balance = 0
-    let coin_image = "https://res.cloudinary.com/dxwhz3r81/image/upload/v1698011384/type_1_w_hqvuex.png"
+    let coin_image = "https://res.cloudinary.com/dxwhz3r81/image/upload/v1697827828/ppl_logo_mxiaot.png"
     let coin_fname =  "PLAY PLAY LOTTERY"
     let coin_name = "PPL"
     let data = {user_id, balance, coin_image, coin_fname, coin_name}

@@ -4,9 +4,7 @@ const { handleWagerIncrease, handleProfileTransactions } = require("../profile_m
 const crash_game = require("../model/crashgame")
 const Wallet = require("../model/wallet")
 const USDT_wallet = require("../model/Usdt-wallet")
-const PPDWallet = require("../model/PPD-wallet")
 const PPFWallet = require("../model/PPF-wallet")
-const PPLWallet = require("../model/PPL-wallet")
 
 const updateUserWallet = (async(data)=>{
   await Wallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
@@ -16,13 +14,8 @@ const updateUserWallet = (async(data)=>{
   else if(data.bet_token_name === "USDT"){
     await USDT_wallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
   }
-  else if(data.bet_token_name === "PPD"){
-    await PPDWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
-  }
-  else if(data.bet_token_name === "PPL"){
-    await PPLWallet.updateOne({ user_id:data.user_id }, {balance: data.current_amount});
-  }
 })
+
 const CraeatBetGame = (async(data)=>{
   let bet = {
     user_id: data.user_id,
@@ -67,7 +60,6 @@ try {
 } catch (err) {
   console.error(err);
 }
-
 })
 
 let hidden;

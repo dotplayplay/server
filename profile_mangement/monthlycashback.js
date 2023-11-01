@@ -52,9 +52,9 @@ const handleCashReturn = (async(user_id, cash)=>{
 const handleMonthlyCashbackImplementation = (async()=>{
   let hsjiis = await CashBackDB.find()
   hsjiis.forEach(element => {
+    let vip_level = element.vip_level
+    let user_id = element.user_id
     if(element.monthly_cashback > 10000){
-      let vip_level = element.vip_level
-      let user_id = element.user_id
       let cash;
       let monthly_cashback = element.monthly_cashback
       if(vip_level < 38){
