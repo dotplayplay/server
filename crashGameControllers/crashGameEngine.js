@@ -4,7 +4,6 @@ const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 const {crashPointFromHash} = require("./hashseed")
 const { handleCrashHistory, handleGameCrash , handleMoonTrendballEl} = require("./crashStore.js")
 const { handleProfileTransactions } = require("../profile_mangement/index")
-
 const { handleRechargeimplement } = require("../profile_mangement/cashbacks")
 const { handleMonthlyCashbackImplementation } = require("../profile_mangement/monthlycashback")
 const { handleWeeklyCashbackImplementation } = require("../profile_mangement/week_cashback")
@@ -41,13 +40,11 @@ const io = new Server(httpServer, {
     },
 });
 
-
 // ==================== fetch single active users bets ==================================
 const fetchUsersBets = (async()=>{
     const data = await CrashGame.find()
      io.emit("my-bet", data)
 })
-
 const fetch_activePlayers = (async(game_id)=>{
     try{
         const data = await CrashGame.find({game_id})
