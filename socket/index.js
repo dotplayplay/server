@@ -25,7 +25,7 @@ let maxRange = 100;
 async function createsocket(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: ["https://dotplayplay.netlify.app", "http://localhost:5173", "http://localhost:5174"]
+      origin: ["https://dotplayplay.netlify.app", "https://dotplayplayy.vercel.app", "http://localhost:5173", "http://localhost:5174"]
     },
   });
 
