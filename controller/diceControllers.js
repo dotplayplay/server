@@ -184,20 +184,24 @@ const InitializeDiceGame = (async (user_id) => {
   })
 
 
-  // const {serverSeed: server_seed, hash: hash_seed, clientSeed: client_seed } = handleHashGeneration();
-  // let data = {
-  //   user_id: user_id,
-  //   nonce: 0,
-  //   server_seed,
-  //   hash_seed,
-  //   client_seed,
-  //   is_open: false,
-  //   updated_at: currentTime
-  // }
-  // await DiceEncription.create(data)
+  const {serverSeed: server_seed, hash: hash_seed, clientSeed: client_seed } = handleHashGeneration();
+  let data = {
+    user_id: user_id,
+    nonce: 0,
+    server_seed,
+    hash_seed,
+    client_seed,
+    is_open: false,
+    updated_at: currentTime
+  }
+  try{
+    await DiceEncription.create(data)
+  }
+  catch(error){
+    console.log(error)
+  }
 })
 
-InitializeDiceGame()
 
 const handlePrev_Games = (async (req, res) => {
   const user_id = req.id
