@@ -16,7 +16,7 @@ const Profile = require("./routes/Profile.js");
 const Chat = require("./routes/chat");
 const Notify = require("./routes/notify.js");
 // require("./controller/lotteryEngine.js");
-// require("./controller/cronScheduler.js");
+// require("./controller/cronScheduler.js")
 require("./controller/rainCronScheduller.js");
 const minegame = require("./routes/mines");
 const Wallet = require("./routes/wallet.js");
