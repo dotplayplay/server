@@ -10,13 +10,10 @@ const CrashGame = require("./routes/crashgame.js");
 const plinkoGame = require("./routes/plinkoGame.js");
 const User = require("./routes/Users.js");
 const Admin = require("./routes/admin.js");
-const VerifyGames = require("./routes/admin/games/crash");
 const Promotion = require("./routes/promotion.js");
 const Profile = require("./routes/Profile.js");
 const Chat = require("./routes/chat");
 const Notify = require("./routes/notify.js");
-// require("./controller/lotteryEngine.js");
-// require("./controller/cronScheduler.js")
 require("./controller/rainCronScheduller.js");
 const minegame = require("./routes/mines");
 const Wallet = require("./routes/wallet.js");
@@ -31,13 +28,12 @@ const TransactionHistory = require("./routes/transactionHistory.js");
 const homePageUpdates = require("./routes/homePageUpdates");
 const { createsocket } = require("./socket/index.js");
 const { createServer } = require("node:http");
-
 const { testCashback } = require("./profile_mangement/week_cashback");
 const { testResetCashback } = require("./profile_mangement/rechargebonus");
+const Currency = require("./routes/currency");
 
 require("dotenv").config();
 // // ============ Initilize the app ========================
-
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -71,8 +67,7 @@ app.use("/api/transaction-history", TransactionHistory);
 app.use("/admin/all-players", AllPLays);
 app.use("/api/home-page-updates", homePageUpdates);
 app.use("/api/promotion", Promotion);
-app.use("/admin/all-players", AllPLays);
-app.use("/admin/verify", VerifyGames);
+app.use("/api/system", Currency);
 //TODO: REMOVE
 app.post("/api/test-cashback", testCashback);
 //TODO: REMOVE
@@ -80,7 +75,6 @@ app.post("/api/deactivate-recharge", testResetCashback);
 
 //admin routes
 app.use("/admin", Admin);
-
 //Notification
 app.use("/api/notifies", Notify);
 
@@ -90,10 +84,11 @@ app.get("/", (req, res) => {
 
 mongoose.set('strictQuery', false);
 const dbUri = `mongodb+srv://highscoreteh:eNiIQbm4ZMSor8VL@cluster0.xmpkpjc.mongodb.net/main_page?retryWrites=true&w=majority`
+
 // const dbUri = `mongodb://localhost:27017/dpp`;
-mongoose.connect(dbUri, { useNewUrlParser: true,  useUnifiedTopology: true })
-    .then((result)=>  console.log('Database connected'))
-    .catch((err)=> console.log(err))
+mongoose.connect(dbUri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then((result) => console.log('Database connected'))
+  .catch((err) => console.log(err))
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
   console.log("Running on port " + PORT);

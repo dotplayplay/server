@@ -24,10 +24,12 @@ const GameStatus = {
   ENDED: 3,
 };
 
-const salt = "Qede00000000000w00wd001bw4dc6a1e86083f95500b096231436e9b25cbdd0075c4";
+const SALT =
+  "Qede00000000000w00wd001bw4dc6a1e86083f95500b096231436e9b25cbdd0075c4";
+
 function calculateCrashPoint(hash) {
   let seed = crypto
-    .createHmac("sha256", salt)
+    .createHmac("sha256", SALT)
     .update(hash, "hex")
     .digest("hex");
   const nBits = 52; // number of most significant bits to use
@@ -42,16 +44,14 @@ function calculateCrashPoint(hash) {
   const result = Math.floor(X);
   return Math.max(1, result / 100);
 
-  // const hashEl = crypto.createHmac("sha256", hash).update(salt).digest("hex"); 
-  // const hex = hashEl.substring(0, 8);
-  // const int = parseInt(hex, 16);
-  // const crashpoint = Math.max(1, (Math.pow(2, 32) / (int + 1)) * (1 - 0.01)).toFixed(3);
-  // const rounddown = (parseFloat(Math.floor(crashpoint * 100) / 100)).toFixed(2);
-  // // let row = { hash: gameHash.game_hash, crashpoint: rounddown, game_id: gameHash.game_id};
-  // return rounddown
+  // const randomValueHex = hash.substring(0, 13);
+  // const randomValueDecimal = parseInt(randomValueHex, 16);
+  // const max13CharHex = 0x10000000000000;
+  // const randomNumber = randomValueDecimal / max13CharHex;
+  // let multiplier = 99 / (1 - randomNumber);
+  // multiplier = Math.max(multiplier, 100);
+  // return Math.round((multiplier / 100) * 100) / 100; // rounding to 2 decimal places
 }
-
-calculateCrashPoint(`4ccee491b1df79f24a53127c03dc38c01a0b97186363d7f29f1a25feecc16577`)
 
 function calculateElapsed(t) {
   return Math.log(t) / 6e-5;
@@ -449,8 +449,11 @@ class CrashGameEngine {
       // console.log("Bet ", bet)
       const rate = getPayout(bet);
       const won = wonCallback(bet);
+      bet.won = won;
       const balanceUpdate = won ? bet.bet * rate - bet.bet : -bet.bet;
       // console.log("Updating user wallet balance > ", balanceUpdate, bet, won)
+      
+      
       if (bet.currencyName !== "PPF") {
         handleWagerIncrease({
           bet_amount: bet.bet,
@@ -499,6 +502,16 @@ class CrashGameEngine {
           { session }
         ).then(([bh]) => {
           (bet.betId = bh.bet_id), (bet.betType = bet_type);
+          const winningAmount = bet.won ? bet.bet * rate - bet.bet : bet.bet;
+          if (this.betsCallback) this.betsCallback({
+            game_type: "Crash Game",
+            hidden: bet.hidden,
+            player: bet.hidden ? "Hidden" : bet.name,
+            bet_id: bh.bet_id,
+            token_img: bh.token_img,
+            payout: bh.won ? bh.payout * 100 : 100,
+            profit_amount: bh.won ? winningAmount : bh.bet
+          });
           let bil = {
             user_id: bh.user_id,
             transaction_type: "Crash Game",
@@ -510,7 +523,6 @@ class CrashGameEngine {
             status: won,
             bill_id: bh.bet_id,
           };
-
           return Bills.create([bil], { session });
         })
       );
@@ -518,14 +530,16 @@ class CrashGameEngine {
     return betPromisses;
   }
 
-  async run() {
+  async run(betsCallback) {
+    this.betsCallback = betsCallback;
     try {
       clearTimeout(this.loopTimeout);
       let game = await CrashGameModel.findOne({ concluded: false }).sort({
         _id: -1,
       });
       if (!game) {
-        const { hash } =  (await CrashGameHash.findOneAndUpdate(
+        const { hash } =
+          (await CrashGameHash.findOneAndUpdate(
             { used: false },
             { used: true }
           ).sort({
@@ -561,6 +575,7 @@ class CrashGameEngine {
           betTime: b.bet_time,
           autoEscapeRate: b.auto_escape,
         }));
+      
       this.game.xBets = game.bets
         .filter((b) => b.bet_type !== 0)
         .map((b) => ({
