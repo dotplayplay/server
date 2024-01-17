@@ -222,7 +222,6 @@ const UpdateWins = (async(req, res)=>{
     }
 })
 
-
 const handleDiceGameEncryption = (async (req, res) => {
   const { user_id } = req.id
   try {
