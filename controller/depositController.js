@@ -2,8 +2,8 @@ const { default: axios } = require("axios");
 const crypto = require("crypto");
 const DepositRequest = require("../model/deposit_request")
 const USDTwallet = require("../model/Usdt-wallet")
-const CCPAYMENT_API_ID = "202310051818371709996528511463424";
-const CC_APP_SECRET = "206aed2f03af1b70305fb11319f2f57b";
+const CCPAYMENT_API_ID = "kkPjx1uc0Euhup5h";
+const CC_APP_SECRET = "3c82f2a5b9720033cbc1078910a87729";
 const CCPAYMENT_API_URL = "https://admin.ccpayment.com";
 const { handleProfileTransactions } = require("../profile_mangement/index")
 const { handlePPDunLockUpdate } = require("../profile_mangement/ppd_unlock")
@@ -11,29 +11,34 @@ const { handleTotalNewDepsitCount } = require("../profile_mangement/cashbacks");
 const { updateDepositHistory } = require("./transactionHistories/updateDepositHistory");
 
 const RequestTransaction = (async(event)=>{
-  // Get the current date and time
-const currentDate = new Date();
-// Calculate the date and time 16 hours from now
-const futureDate = new Date(currentDate.getTime() + 12 * 60 * 60 * 1000);
-  let data = {
-    user_id: event.user_id,
-    order_id: event.data.order_id,
-    amount: event.data.amount,
-    crypto: event.data.crypto,
-    network: event.data.network,
-    pay_address: event.data.pay_address,
-    token_id: event.data.token_id,
-    order_valid_period: event.data.order_valid_period,
-    time: new Date(),
-    expire_in: futureDate,
-    merchant_order_id: event.merchant_order_id,
-    contract: "-",
-    status: "Pending"
+  console.log(event)
+  try{
+    const currentDate = new Date();
+    // Calculate the date and time 16 hours from now
+    // const futureDate = new Date(currentDate.getTime() + 12 * 60 * 60 * 1000);
+    //   let data = {
+    //     user_id: event.user_id,
+    //     order_id: event.data.order_id,
+    //     amount: event.data.amount,
+    //     crypto: event.data.crypto,
+    //     network: event.data.network,
+    //     pay_address: event.data.pay_address,
+    //     token_id: event.data.token_id,
+    //     order_valid_period: event.data.order_valid_period,
+    //     time: new Date(),
+    //     expire_in: futureDate,
+    //     merchant_order_id: event.merchant_order_id,
+    //     contract: "-",
+    //     status: "Pending"
+    //   }
+    //   if(event.msg === "success"){
+    //     await DepositRequest.create(data)
+    //   }else{
+    //     console.log("something went wrong")
+    //   }
   }
-  if(event.msg === "success"){
-    await DepositRequest.create(data)
-  }else{
-    console.log("something went wrong")
+  catch(error){
+    console.log(error)
   }
 })
 
@@ -58,7 +63,7 @@ const handleFirstDeposit = ((user_id, amount, num)=>{
     }
 
     //Update Deposit Bonus DataBase
-    handlePPDunLockUpdate(user_id, bonus)
+  handlePPDunLockUpdate(user_id, bonus)
     // let sql = `INSERT INTO first_deposit SET ?`;
     // connection.query(sql, data, (err, result)=>{
     //     if(err){
@@ -148,6 +153,7 @@ const initiateDeposit = async (req, res) => {
   await axios.post(`${CCPAYMENT_API_URL}/ccpayment/v1/bill/create`, paymentData,
       {  headers: headers } 
     ).then((response)=>{
+      console.log(response.data)
       RequestTransaction({...response.data, user_id, merchant_order_id:merchant_order_id.toString()})
       res.status(200).json({status: true,message: response.data.msg, ...response.data, status: "pending"});
     })
@@ -162,7 +168,7 @@ const initiateDeposit = async (req, res) => {
   }
 };
 
-const confirmDeposit = async () => {
+const confirmDeposit = async (req, res) => {
   try {
     let usersID = []
     let deoop = await DepositRequest.find()
@@ -211,9 +217,6 @@ const confirmDeposit = async () => {
   }
 }
 
-setInterval(() => {
-  // confirmDeposit()
-}, 17000);
 
 
 const fetchPendingOrder = (async(req, res)=>{
@@ -228,4 +231,4 @@ const fetchPendingOrder = (async(req, res)=>{
 })
 
 
-module.exports = { initiateDeposit, fetchPendingOrder }
+module.exports = { initiateDeposit, fetchPendingOrder , confirmDeposit}

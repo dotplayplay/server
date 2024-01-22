@@ -10,6 +10,7 @@ const CrashGame = require("./routes/crashgame.js");
 const plinkoGame = require("./routes/plinkoGame.js");
 const User = require("./routes/Users.js");
 const Admin = require("./routes/admin.js");
+const Verify = require("./routes/admin/games/crash.js");
 const Promotion = require("./routes/promotion.js");
 const Profile = require("./routes/Profile.js");
 const Chat = require("./routes/chat");
@@ -68,6 +69,7 @@ app.use("/admin/all-players", AllPLays);
 app.use("/api/home-page-updates", homePageUpdates);
 app.use("/api/promotion", Promotion);
 app.use("/api/system", Currency);
+app.use("/admin/verify", Verify);
 //TODO: REMOVE
 app.post("/api/test-cashback", testCashback);
 //TODO: REMOVE
